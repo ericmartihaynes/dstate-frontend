@@ -27,8 +27,13 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  http:
+  dart_web3: ^0.0.3
+  url_launcher: ^6.1.0
+  walletconnect_dart: ^0.0.9
   flutter:
     sdk: flutter
+
 
 
   # The following adds the Cupertino Icons font to your application.

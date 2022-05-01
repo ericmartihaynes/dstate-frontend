@@ -1,4 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
+import 'dart:convert';
+import 'package:url_launcher/url_launcher.dart';
+//web3
+import 'package:dstate/transaction_sender.dart';
+import 'package:walletconnect_dart/walletconnect_dart.dart';
+import 'package:dart_web3/dart_web3.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -6,6 +14,7 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
+
 
   // This widget is the root of your application.
   @override
@@ -32,6 +41,7 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
 
+
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
   // how it looks.
@@ -43,23 +53,76 @@ class MyHomePage extends StatefulWidget {
 
   final String title;
 
+
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  final nameController = TextEditingController();
+  final amountController = TextEditingController();
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  //Send data to backend
+  Future<Response> sendData(String name, double tokenAmount) {
+    print(name + " " + tokenAmount.toString());
+    return post(
+      Uri.parse('http://localhost:3001/building'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'Name': name,
+        'Amount': tokenAmount.toString(),
+      }),
+    );
+    //CHANGE TO JSON CALL
   }
+
+  //Connect to Wallet
+  _walletConnect() async {
+    final connector = WalletConnect(
+      bridge: 'https://bridge.walletconnect.org',
+      clientMeta: const PeerMeta(
+        name: 'WalletConnect',
+        description: 'WalletConnect Developer App',
+        url: 'https://walletconnect.org',
+        icons: [
+          'https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media'
+        ],
+      ),
+    );
+    // Subscribe to events
+    connector.on('connect', (session) => print(session));
+    connector.on('session_update', (payload) => print(payload));
+    connector.on('disconnect', (session) => print(session));
+
+    // Create a new session
+
+
+    final session = await connector.createSession(
+        chainId: 4, //Rinkeby is 4, Ethereum is 1
+        onDisplayUri: (uri) async => {print(uri), await launchUrl(
+          Uri.parse(uri),
+          mode: LaunchMode.externalApplication,
+        )});
+
+
+    setState(() {
+      final account = session.accounts[0];
+    });
+
+    String rpcUrl = "https://rinkeby.infura.io/v3/2af9187666bc4f2485d90c76f9727138";
+    var credentials; //This should be what is sent to the backend eventually
+    //if (account != null) {
+      final client = Web3Client(rpcUrl, Client());
+      EthereumWalletConnectProvider provider =
+      EthereumWalletConnectProvider(connector);
+      credentials = WalletConnectEthereumCredentials(provider: provider);
+      //yourContract = YourContract(address: contractAddr, client: client);
+    //}
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -84,6 +147,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
               child: TextFormField(
+                controller: nameController,
                 decoration: const InputDecoration(
                   border: UnderlineInputBorder(),
                   labelText: 'Name of Token',
@@ -93,6 +157,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
               child: TextFormField(
+                controller: amountController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
                   border: UnderlineInputBorder(),
@@ -100,14 +165,28 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
             ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 16),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.white24,
+                  padding: const EdgeInsets.all(16.0),
+                  textStyle: const TextStyle(fontSize: 22, fontFamily: 'Poppins'),
+                ),
+                onPressed: () async => _walletConnect(),
+                child: const Text('Connect Wallet'),
+              ),
+            ),
           ],
+
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
+        onPressed: ()=> sendData(nameController.text, double.parse(amountController.text)),
         tooltip: 'Increment',
         child: const Icon(Icons.check),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
+      // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
