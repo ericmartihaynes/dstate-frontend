@@ -27,10 +27,12 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
-  http:
+  http: ^0.13.4
+  universal_html: ^1.2.1
   dart_web3: ^0.0.3
   url_launcher: ^6.1.0
   walletconnect_dart: ^0.0.9
+  flutter_web3: ^2.1.9
   flutter:
     sdk: flutter
 

@@ -3,6 +3,7 @@ import 'package:http/http.dart';
 import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
 //web3
+import 'package:dstate/metamask_not_web.dart' if (dart.library.js) 'package:dstate/metamask_web.dart';
 import 'package:dstate/transaction_sender.dart';
 import 'package:walletconnect_dart/walletconnect_dart.dart';
 import 'package:dart_web3/dart_web3.dart';
@@ -81,46 +82,57 @@ class _MyHomePageState extends State<MyHomePage> {
 
   //Connect to Wallet
   _walletConnect() async {
-    final connector = WalletConnect(
-      bridge: 'https://bridge.walletconnect.org',
-      clientMeta: const PeerMeta(
-        name: 'WalletConnect',
-        description: 'WalletConnect Developer App',
-        url: 'https://walletconnect.org',
-        icons: [
-          'https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media'
-        ],
-      ),
-    );
-    // Subscribe to events
-    connector.on('connect', (session) => print(session));
-    connector.on('session_update', (payload) => print(payload));
-    connector.on('disconnect', (session) => print(session));
+    //Wallet Connect Mobile
+    if(Theme.of(context).platform == TargetPlatform.iOS || Theme.of(context).platform == TargetPlatform.android) {
+      final connector = WalletConnect(
+        bridge: 'https://bridge.walletconnect.org',
+        clientMeta: const PeerMeta(
+          name: 'WalletConnect',
+          description: 'WalletConnect Developer App',
+          url: 'https://walletconnect.org',
+          icons: [
+            'https://gblobscdn.gitbook.com/spaces%2F-LJJeCjcLrr53DcT1Ml7%2Favatar.png?alt=media'
+          ],
+        ),
+      );
+      // Subscribe to events
+      connector.on('connect', (session) => print(session));
+      connector.on('session_update', (payload) => print(payload));
+      connector.on('disconnect', (session) => print(session));
 
-    // Create a new session
-
-
-    final session = await connector.createSession(
-        chainId: 4, //Rinkeby is 4, Ethereum is 1
-        onDisplayUri: (uri) async => {print(uri), await launchUrl(
-          Uri.parse(uri),
-          mode: LaunchMode.externalApplication,
-        )});
+      // Create a new session
 
 
-    setState(() {
-      final account = session.accounts[0];
-    });
+      final session = await connector.createSession(
+          chainId: 4, //Rinkeby is 4, Ethereum is 1
+          onDisplayUri: (uri) async =>
+          {print(uri), await launchUrl(
+            Uri.parse(uri),
+            mode: LaunchMode.externalApplication,
+          )});
 
-    String rpcUrl = "https://rinkeby.infura.io/v3/2af9187666bc4f2485d90c76f9727138";
-    var credentials; //This should be what is sent to the backend eventually
-    //if (account != null) {
+
+      setState(() {
+        final account = session.accounts[0];
+      });
+
+      String rpcUrl = "https://rinkeby.infura.io/v3/2af9187666bc4f2485d90c76f9727138";
+      var credentials; //This should be what is sent to the backend eventually
+      //if (account != null) {
       final client = Web3Client(rpcUrl, Client());
       EthereumWalletConnectProvider provider =
       EthereumWalletConnectProvider(connector);
       credentials = WalletConnectEthereumCredentials(provider: provider);
       //yourContract = YourContract(address: contractAddr, client: client);
-    //}
+      //}
+    }
+    //Wallet Connect Web
+    else {
+      MetaMaskProvider metamask = MetaMaskProvider();
+      await metamask.connect();
+      print(metamask.currentAddress);
+      print(metamask.currentChain);
+    }
   }
 
 
