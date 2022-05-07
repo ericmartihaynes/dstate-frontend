@@ -55,6 +55,7 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
 
+
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
@@ -63,6 +64,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
   final nameController = TextEditingController();
   final amountController = TextEditingController();
+  String accountAddress = "";
 
   //Send data to backend
   Future<Response> sendData(String name, double tokenAmount) {
@@ -75,12 +77,40 @@ class _MyHomePageState extends State<MyHomePage> {
       body: jsonEncode(<String, String>{
         'Name': name,
         'Amount': tokenAmount.toString(),
+        'Account': accountAddress,
+      }),
+    );
+    //CHANGE TO JSON CALL
+  }
+
+  Future<Response> fetchUsers(String publicAddress) {
+    print(publicAddress);
+    return get(
+      Uri.parse('http://10.20.11.1:3001/users?publicAddress=' + publicAddress),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+    //CHANGE TO JSON CALL
+  }
+
+  Future<Response> sendPost(String publicAddress) {
+    return post(
+      Uri.parse('http://10.20.11.1:3001/users'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'publicAddress': publicAddress,
+        'email': "test@test.com",
+        'userName': "flutterTest",
       }),
     );
     //CHANGE TO JSON CALL
   }
 
   //Connect to Wallet
+  //TODO: Make walletConnect work if metamask is already open
   _walletConnect() async {
     //Wallet Connect Mobile
     if(Theme.of(context).platform == TargetPlatform.iOS || Theme.of(context).platform == TargetPlatform.android) {
@@ -102,14 +132,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
       // Create a new session
 
-
+      String uriii = "";
       final session = await connector.createSession(
           chainId: 4, //Rinkeby is 4, Ethereum is 1
           onDisplayUri: (uri) async =>
-          {print(uri), await launchUrl(
+          {uriii = uri, await launchUrl(
             Uri.parse(uri),
             mode: LaunchMode.externalApplication,
           )});
+
 
 
       setState(() {
@@ -125,6 +156,42 @@ class _MyHomePageState extends State<MyHomePage> {
       credentials = WalletConnectEthereumCredentials(provider: provider);
       //yourContract = YourContract(address: contractAddr, client: client);
       //}
+      accountAddress = session.accounts[0];
+
+      Response response = await fetchUsers(accountAddress);
+
+      Map<String, dynamic> decoded =json.decode(response.body);
+
+      var user;
+
+      //first time user
+      if(decoded["users"].length == 0){
+        Response response2 = await sendPost(accountAddress);
+        Map<String, dynamic> decoded2 =json.decode(response2.body);
+        user = decoded2["user"];
+
+
+      }
+      //user already exists
+      else{
+        user = decoded["users"][0];
+      }
+
+      //\x19Ethereum Signed Message:\n1h
+
+      String signature = await provider.sign(message: "0x5C783139457468657265756D205369676E6564204D6573736167653A5C6E3168", address: accountAddress);
+
+      print(signature);
+      //TODO: send signature to backend
+
+
+
+
+
+
+
+      //Map<String, dynamic>.from(decoded);
+
     }
     //Wallet Connect Web
     else {
@@ -132,6 +199,35 @@ class _MyHomePageState extends State<MyHomePage> {
       await metamask.connect();
       print(metamask.currentAddress);
       print(metamask.currentChain);
+
+      accountAddress = metamask.currentAddress;
+
+      Response response = await fetchUsers(accountAddress);
+
+      Map<String, dynamic> decoded =json.decode(response.body);
+
+      var user;
+
+      //first time user
+      if(decoded["users"].length == 0){
+        Response response2 = await sendPost(accountAddress);
+        Map<String, dynamic> decoded2 =json.decode(response2.body);
+        user = decoded2["user"];
+
+
+      }
+      //user already exists
+      else{
+        user = decoded["users"][0];
+      }
+
+      //\x19Ethereum Signed Message:\n1h
+
+      //String signature = await provider.sign(message: "0x5C783139457468657265756D205369676E6564204D6573736167653A5C6E3168", address: accountAddress);
+
+      //print(signature);
+      //TODO: send signature to backend
+
     }
   }
 
