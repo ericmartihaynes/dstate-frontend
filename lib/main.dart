@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:crypto/crypto.dart';
 //web3
 import 'package:dstate/metamask_not_web.dart' if (dart.library.js) 'package:dstate/metamask_web.dart';
 import 'package:dstate/transaction_sender.dart';
@@ -65,19 +66,27 @@ class _MyHomePageState extends State<MyHomePage> {
   final nameController = TextEditingController();
   final amountController = TextEditingController();
   String accountAddress = "";
+  String authToken = "";
+
+  //Via:
+  //Kamtjatka: 10.20.11.1
+  String localIp = "10.20.11.1"; //TODO Change ip
 
   //Send data to backend
   Future<Response> sendData(String name, double tokenAmount) {
     print(name + " " + tokenAmount.toString());
     return post(
-      Uri.parse('http://localhost:3001/building'),
+      Uri.parse('http://' + localIp + ':3001/building'), //REMEMBER TO CHANGE IP ADDRESS
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer ' + authToken,
       },
       body: jsonEncode(<String, String>{
-        'Name': name,
-        'Amount': tokenAmount.toString(),
-        'Account': accountAddress,
+        'name': name,
+        'initial_amount': tokenAmount.toInt().toString(),
+        'symbol': "DST1",
+        'building_name': 'Kamtjatka',
+        'building_address': 'Kamtjatka 13',
       }),
     );
     //CHANGE TO JSON CALL
@@ -85,8 +94,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<Response> fetchUsers(String publicAddress) {
     print(publicAddress);
+    print("print1");
     return get(
-      Uri.parse('http://10.20.11.1:3001/users?publicAddress=' + publicAddress),
+      Uri.parse('http://' + localIp + ':3001/users?publicAddress=' + publicAddress), //REMEMBER TO CHANGE IP ADDRESS
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -96,7 +106,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<Response> sendPost(String publicAddress) {
     return post(
-      Uri.parse('http://10.20.11.1:3001/users'),
+      Uri.parse('http://' + localIp + ':3001/users'), //REMEMBER TO CHANGE IP ADDRESS
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -109,8 +119,23 @@ class _MyHomePageState extends State<MyHomePage> {
     //CHANGE TO JSON CALL
   }
 
+  Future<Response> getJWT(String publicAddress, String signature) {
+    print(publicAddress);
+    return post(
+      Uri.parse('http://' + localIp + ':3001/auth'), //REMEMBER TO CHANGE IP ADDRESS
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'publicAddress': publicAddress,
+        'signature': signature,
+      }),
+    );
+    //CHANGE TO JSON CALL
+  }
+
   //Connect to Wallet
-  //TODO: Make walletConnect work if metamask is already open
+  //TODO: Make walletConnect work if metamask is already open ?
   _walletConnect() async {
     //Wallet Connect Mobile
     if(Theme.of(context).platform == TargetPlatform.iOS || Theme.of(context).platform == TargetPlatform.android) {
@@ -136,7 +161,7 @@ class _MyHomePageState extends State<MyHomePage> {
       final session = await connector.createSession(
           chainId: 4, //Rinkeby is 4, Ethereum is 1
           onDisplayUri: (uri) async =>
-          {uriii = uri, await launchUrl(
+          {print(uri), await launchUrl(
             Uri.parse(uri),
             mode: LaunchMode.externalApplication,
           )});
@@ -157,8 +182,9 @@ class _MyHomePageState extends State<MyHomePage> {
       //yourContract = YourContract(address: contractAddr, client: client);
       //}
       accountAddress = session.accounts[0];
-
+      print('beforefetch');
       Response response = await fetchUsers(accountAddress);
+      print("afterfetch");
 
       Map<String, dynamic> decoded =json.decode(response.body);
 
@@ -169,19 +195,32 @@ class _MyHomePageState extends State<MyHomePage> {
         Response response2 = await sendPost(accountAddress);
         Map<String, dynamic> decoded2 =json.decode(response2.body);
         user = decoded2["user"];
+        print("first time");
 
 
       }
       //user already exists
       else{
+        print("I exist");
         user = decoded["users"][0];
       }
 
-      //\x19Ethereum Signed Message:\n1h
-
-      String signature = await provider.sign(message: "0x5C783139457468657265756D205369676E6564204D6573736167653A5C6E3168", address: accountAddress);
+      String nonce = user["nonce"].toString();
+      String msg = "I am signing my one-time nonce: " + nonce;//I am signing my one-time nonce: ${user.nonce}
+      //Shout-out to HaoCherHong for finding a fix for this and adding personalSign to the walletconnect_dart library :)
+      String signature = await provider.personalSign(message: msg, address: accountAddress, password: "test password");
 
       print(signature);
+      print(accountAddress);
+      //Response jwtResponse = await getJWT(accountAddress, signature);
+      //!!!Response jwtResponse = await getJWT(accountAddress, "0x78464efcef0520455a04bebd120d6f26cc6bcdd35a1bfe670eaa9d5d3161cab6390acc382ac7d76aa0579ccf568113c900be1ed77d417f235a8b3b8807fc31f71c");
+      Response jwtResponse = await getJWT(accountAddress, signature);
+      Map<String, dynamic> jwtDecoded =json.decode(jwtResponse.body);
+
+      authToken = jwtDecoded["accessToken"];
+      print(authToken);
+
+
       //TODO: send signature to backend
 
 
