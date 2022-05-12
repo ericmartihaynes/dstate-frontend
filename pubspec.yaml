@@ -31,8 +31,9 @@ dependencies:
   universal_html: ^1.2.1
   dart_web3: ^0.0.3
   url_launcher: ^6.1.0
-  walletconnect_dart: ^0.0.9
+  walletconnect_dart:
   flutter_web3: ^2.1.9
+  convert: ^3.0.1
   flutter:
     sdk: flutter
 
