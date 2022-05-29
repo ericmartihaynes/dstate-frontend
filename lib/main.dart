@@ -16,6 +16,8 @@ import 'package:walletconnect_dart/walletconnect_dart.dart';
 import 'package:dart_web3/dart_web3.dart';
 import 'package:convert/convert.dart';
 
+import 'menu.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -40,14 +42,20 @@ class MyApp extends StatelessWidget {
         // or simply save your changes to "hot reload" in a Flutter IDE).
         // Notice that the counter didn't reset back to zero; the application
         // is not restarted.
-        primarySwatch: Colors.green,
+
+        //Swatch: Colors.green,
         //primaryColor: Colors.black,
-        brightness: Brightness.dark,
+        //brightness: Brightness.dark,
         //backgroundColor: const Color(0xFF212121),
         //dividerColor: Colors.black12,
+        brightness: Brightness.dark,
+        //primarySwatch: Colors.orange,
+        accentColor: Colors.purple[200],
+        toggleableActiveColor: Colors.purple[500],
+        textSelectionColor: Colors.purple[200],
 
       ),
-      home: const MyHomePage(title: 'Create Your Token'),
+      home: const MyHomePage(title: 'Log In'),
     );
   }
 }
@@ -336,13 +344,13 @@ class _MyHomePageState extends State<MyHomePage> {
               padding: const EdgeInsets.symmetric(horizontal: 125, vertical: 16),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  primary: uiMetamaskConnected ? Colors.purple : Colors.black12,
+                  primary: uiMetamaskConnected ? Colors.deepPurple : Colors.black12,
                   padding: const EdgeInsets.all(16.0),
                   textStyle: const TextStyle(fontSize: 22, fontFamily: 'Poppins'),
                 ),
-                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) {
+                onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
 
-                  return TokenizePage(title: "Tokenize?", provider: provider, authToken: authToken, localIp: localIp);
+                  return MenuPage(title: "Dstate", provider: provider, authToken: authToken, localIp: localIp);
 
                 })),
                 child: Text(uiMetamaskConnected ? "Enter" : ""),

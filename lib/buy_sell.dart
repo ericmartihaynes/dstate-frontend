@@ -23,9 +23,14 @@ final amountToSellController = TextEditingController();
 final amountToBuyController = TextEditingController();
 final amountToCancelController = TextEditingController();
 const String tokenAddress = "0xSomethinghere";
+int _selectedIndex = 0;
 
-class BuySellPage extends StatelessWidget {
-  const BuySellPage({Key? key, required this.context, required this.title, required this.authToken, required this.localIp, required this. accountAddress, required this.provider, required this.currentPrice}) : super(key: key);
+
+
+class BuySellPage extends StatefulWidget {
+  const BuySellPage(
+      {Key? key, required this.context, required this.title, required this.authToken, required this.localIp, required this.accountAddress, required this.provider, required this.currentPrice})
+      : super(key: key);
   final BuildContext context;
   final String title;
   final String authToken;
@@ -33,14 +38,19 @@ class BuySellPage extends StatelessWidget {
   final String accountAddress;
   final EthereumWalletConnectProvider provider;
   final String currentPrice;
+
+  @override
+  State<BuySellPage> createState() => _MyHomePageState();
+}
   //final int nonce = 31; //TODO get this from backend!!!!!!!!!!!!!!!!!
+class _MyHomePageState extends State<BuySellPage> {
 
   void sellToken(double ethAmount, double tokenAmount, String buildingId, String tokenAddress) async {
     Response rsp = await post(
-      Uri.parse('http://' + localIp + ':3001/building/createSetPriceTransaction'), //REMEMBER TO CHANGE IP ADDRESS
+      Uri.parse('http://' + widget.localIp + ':3001/building/createSetPriceTransaction'), //REMEMBER TO CHANGE IP ADDRESS
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer ' + authToken,
+        'Authorization': 'Bearer ' + widget.authToken,
       },
       body: jsonEncode(<String, dynamic>{
         'building_id': buildingId,
@@ -59,14 +69,14 @@ class BuySellPage extends StatelessWidget {
     Uint8List encodedData = Uint8List.fromList(value);
     var tx;
     if(/*approved already*/true) {
-      tx = await provider.sendTransaction(from: accountAddress,
+      tx = await widget.provider.sendTransaction(from: widget.accountAddress,
           to: "0x392F7bAccBfE1324df91298ae9Ffc153111CED7c",
           data: encodedData,
           nonce: nonce,
           gas: 1500000); //TODO: test if stating gas is necessary
     }
     else{
-      tx = await provider.sendTransaction(from: accountAddress,
+      tx = await widget.provider.sendTransaction(from: widget.accountAddress,
           to: "0xe922E9152c588e9FCedDD239f6AAF19B2eEC0d6f",
           data: encodedData,
           gas: 1500000);
@@ -77,10 +87,10 @@ class BuySellPage extends StatelessWidget {
 
   void buyToken(double tokenAmount, String buildingId, String tokenAddress) async {
     Response rsp = await post(
-      Uri.parse('http://' + localIp + ':3001/building/getPriceForTokens'), //REMEMBER TO CHANGE IP ADDRESS
+      Uri.parse('http://' + widget.localIp + ':3001/building/getPriceForTokens'), //REMEMBER TO CHANGE IP ADDRESS
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer ' + authToken,
+        'Authorization': 'Bearer ' + widget.authToken,
       },
       body: jsonEncode(<String, dynamic>{
         'building_id': buildingId,
@@ -93,10 +103,10 @@ class BuySellPage extends StatelessWidget {
     String price = decodedRsp["price"];
 
     Response rsp2 = await post(
-      Uri.parse('http://' + localIp + ':3001/building/createBuyTokenTransaction'), //REMEMBER TO CHANGE IP ADDRESS
+      Uri.parse('http://' + widget.localIp + ':3001/building/createBuyTokenTransaction'), //REMEMBER TO CHANGE IP ADDRESS
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer ' + authToken,
+        'Authorization': 'Bearer ' + widget.authToken,
       },
       body: jsonEncode(<String, dynamic>{
         'building_id': buildingId,
@@ -114,7 +124,7 @@ class BuySellPage extends StatelessWidget {
     List<int> value = hex.decode(data2);
     Uint8List encodedData = Uint8List.fromList(value);
     var tx;
-    tx = await provider.sendTransaction(from: accountAddress,
+    tx = await widget.provider.sendTransaction(from: widget.accountAddress,
         to: "0x392F7bAccBfE1324df91298ae9Ffc153111CED7c",
         data: encodedData,
         value: BigInt.parse(price),
@@ -127,10 +137,10 @@ class BuySellPage extends StatelessWidget {
 
   void cancelToken(double tokenAmount, String buildingId, String tokenAddress) async {
     Response rsp = await post(
-      Uri.parse('http://' + localIp + ':3001/building/cancelSale'), //REMEMBER TO CHANGE IP ADDRESS
+      Uri.parse('http://' + widget.localIp + ':3001/building/cancelSale'), //REMEMBER TO CHANGE IP ADDRESS
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer ' + authToken,
+        'Authorization': 'Bearer ' + widget.authToken,
       },
       body: jsonEncode(<String, dynamic>{
         'building_id': buildingId,
@@ -148,7 +158,7 @@ class BuySellPage extends StatelessWidget {
     Uint8List encodedData = Uint8List.fromList(value);
     var tx;
 
-    tx = await provider.sendTransaction(from: accountAddress,
+    tx = await widget.provider.sendTransaction(from: widget.accountAddress,
         to: "0x392F7bAccBfE1324df91298ae9Ffc153111CED7c",
         data: encodedData,
         nonce: nonce,
@@ -160,11 +170,11 @@ class BuySellPage extends StatelessWidget {
 
   beforeVoting() async {
     Response rsp = await post(
-      Uri.parse('http://' + localIp + ':3001/building/getPriceForTokens'),
+      Uri.parse('http://' + widget.localIp + ':3001/building/getPriceForTokens'),
       //REMEMBER TO CHANGE IP ADDRESS
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer ' + authToken,
+        'Authorization': 'Bearer ' + widget.authToken,
       },
       body: jsonEncode(<String, dynamic>{
         'building_id': "628b802a01929414d3cfaab8",
@@ -177,22 +187,22 @@ class BuySellPage extends StatelessWidget {
     Map<String, dynamic> decodedRsp = json.decode(rsp.body);
     String price = (double.parse(decodedRsp["price"]) / (pow(10, 18)))
         .toString();
-    Navigator.push(context, MaterialPageRoute(builder: (context) {
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
       return VotingPage(title: 'Voting',
-          authToken: authToken,
-          localIp: localIp,
-          accountAddress: accountAddress,
-          provider: provider, tokenAddress: "0xe922e9152c588e9fceddd239f6aaf19b2eec0d6f");
+          authToken: widget.authToken,
+          localIp: widget.localIp,
+          accountAddress: widget.accountAddress,
+          provider: widget.provider, tokenAddress: "0xe922e9152c588e9fceddd239f6aaf19b2eec0d6f");
     }));
   }
 
   beforeRent() async {
     Response rsp = await post(
-      Uri.parse('http://' + localIp + ':3001/building/getPriceForTokens'),
+      Uri.parse('http://' + widget.localIp + ':3001/building/getPriceForTokens'),
       //REMEMBER TO CHANGE IP ADDRESS
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer ' + authToken,
+        'Authorization': 'Bearer ' + widget.authToken,
       },
       body: jsonEncode(<String, dynamic>{
         'building_id': "628b802a01929414d3cfaab8",
@@ -205,20 +215,50 @@ class BuySellPage extends StatelessWidget {
     Map<String, dynamic> decodedRsp = json.decode(rsp.body);
     String price = (double.parse(decodedRsp["price"]) / (pow(10, 18)))
         .toString();
-    Navigator.push(context, MaterialPageRoute(builder: (context) {
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
       return RentPage(title: 'Rent',
-          authToken: authToken,
-          localIp: localIp,
-          accountAddress: accountAddress,
-          provider: provider);
+          authToken: widget.authToken,
+          localIp: widget.localIp,
+          accountAddress: widget.accountAddress,
+          provider: widget.provider);
     }));
+  }
+
+  Future<void> _onItemTapped(int index) async {
+    setState(() {
+      //_selectedIndex = index;
+    });
+    if(index == 1){
+      await beforeRent();
+    }
+    else if (index == 2) {
+      await beforeVoting();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
+        title: Text(widget.title),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.toll),
+            label: 'Trade',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.payments),
+            label: 'Rent',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.how_to_vote),
+            label: 'Governance',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
       ),
       body: Center(
         child: ListView(
@@ -227,7 +267,7 @@ class BuySellPage extends StatelessWidget {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               child: Text(
-                'Token Price: ' + currentPrice + ' Ξ',
+                'Token Price: ' + widget.currentPrice + ' Ξ',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),

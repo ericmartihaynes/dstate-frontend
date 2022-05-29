@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:dstate/voting.dart';
 import 'package:flutter/cupertino.dart';
 import 'dart:typed_data';
 
@@ -19,22 +22,30 @@ final depositProposalController = TextEditingController();
 final depositAcceptRejectController = TextEditingController();
 const String tokenAddress = "0xC0FC39483F981eFf534cE1EbdCeFc1C312492d0a";
 const String rentAddress = "0x63a289Ba3f01b30b65E4871AbFc2B91384FDCa0d";
+int _selectedIndex = 1;
 
-class RentPage extends StatelessWidget {
-  const RentPage({Key? key, required this.title, required this.authToken, required this.localIp, required this. accountAddress, required this.provider}) : super(key: key);
+class RentPage extends StatefulWidget {
+  const RentPage(
+      {Key? key, required this.title, required this.authToken, required this.localIp, required this.accountAddress, required this.provider})
+      : super(key: key);
   final String title;
   final String authToken;
   final String localIp;
   final String accountAddress;
   final EthereumWalletConnectProvider provider;
   final int nonce = 29; //TODO get this from backend!!!!!!!!!!!!!!!!!
+  @override
+  State<RentPage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<RentPage> {
 
   void requestRent(String buildingId, String tokenAddress) async {
     Response rsp = await post(
-      Uri.parse('http://' + localIp + ':3001/building/requestRent'), //REMEMBER TO CHANGE IP ADDRESS
+      Uri.parse('http://' + widget.localIp + ':3001/building/requestRent'), //REMEMBER TO CHANGE IP ADDRESS
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer ' + authToken,
+        'Authorization': 'Bearer ' + widget.authToken,
       },
       body: jsonEncode(<String, dynamic>{
         'building_id': buildingId,
@@ -50,7 +61,7 @@ class RentPage extends StatelessWidget {
     List<int> value = hex.decode(data2);
     Uint8List encodedData = Uint8List.fromList(value);
     var tx;
-    tx = await provider.sendTransaction(from: accountAddress,
+    tx = await widget.provider.sendTransaction(from: widget.accountAddress,
         to: rentAddress, //TODO: Change this!!!!!!!!!!!!!!!!!!!!
         data: encodedData,
         nonce: nonce,
@@ -62,10 +73,10 @@ class RentPage extends StatelessWidget {
 
   void payRent(String buildingId, String tokenAddress) async {
     Response rsp = await post(
-      Uri.parse('http://' + localIp + ':3001/building/rent'), //REMEMBER TO CHANGE IP ADDRESS
+      Uri.parse('http://' + widget.localIp + ':3001/building/rent'), //REMEMBER TO CHANGE IP ADDRESS
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer ' + authToken,
+        'Authorization': 'Bearer ' + widget.authToken,
       },
       body: jsonEncode(<String, dynamic>{
         'building_id': buildingId,
@@ -82,7 +93,7 @@ class RentPage extends StatelessWidget {
     List<int> value = hex.decode(data2);
     Uint8List encodedData = Uint8List.fromList(value);
     var tx;
-    tx = await provider.sendTransaction(from: accountAddress,
+    tx = await widget.provider.sendTransaction(from: widget.accountAddress,
         to: rentAddress, //TODO: Change this!!!!!!!!!!!!!!!!!!!!
         data: encodedData,
         value: rentPrice,
@@ -95,10 +106,10 @@ class RentPage extends StatelessWidget {
 
   void withdrawRent(String buildingId, String tokenAddress) async {
     Response rsp = await post(
-      Uri.parse('http://' + localIp + ':3001/building/withdrawRent'), //REMEMBER TO CHANGE IP ADDRESS
+      Uri.parse('http://' + widget.localIp + ':3001/building/withdrawRent'), //REMEMBER TO CHANGE IP ADDRESS
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer ' + authToken,
+        'Authorization': 'Bearer ' + widget.authToken,
       },
       body: jsonEncode(<String, dynamic>{
         'building_id': buildingId,
@@ -114,7 +125,7 @@ class RentPage extends StatelessWidget {
     List<int> value = hex.decode(data2);
     Uint8List encodedData = Uint8List.fromList(value);
     var tx;
-    tx = await provider.sendTransaction(from: accountAddress,
+    tx = await widget.provider.sendTransaction(from: widget.accountAddress,
         to: rentAddress, //TODO: Change this!!!!!!!!!!!!!!!!!!!!
         data: encodedData,
         nonce: nonce,
@@ -126,10 +137,10 @@ class RentPage extends StatelessWidget {
 
   void withdrawPreviousRent(String buildingId, String tokenAddress, int previousRentNumber) async { //TODO: Needs route
     Response rsp = await post(
-      Uri.parse('http://' + localIp + ':3001/building/requestRent'), //REMEMBER TO CHANGE IP ADDRESS
+      Uri.parse('http://' + widget.localIp + ':3001/building/requestRent'), //REMEMBER TO CHANGE IP ADDRESS
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer ' + authToken,
+        'Authorization': 'Bearer ' + widget.authToken,
       },
       body: jsonEncode(<String, dynamic>{
         'building_id': buildingId,
@@ -145,7 +156,7 @@ class RentPage extends StatelessWidget {
     List<int> value = hex.decode(data2);
     Uint8List encodedData = Uint8List.fromList(value);
     var tx;
-    tx = await provider.sendTransaction(from: accountAddress,
+    tx = await widget.provider.sendTransaction(from: widget.accountAddress,
         to: rentAddress, //TODO: Change this!!!!!!!!!!!!!!!!!!!!
         data: encodedData,
         nonce: nonce,
@@ -157,10 +168,10 @@ class RentPage extends StatelessWidget {
 
   void suggestDepositReturn(String buildingId, String tokenAddress, int suggestedAmount) async { //TODO: route needs to ask for suggested amount
     Response rsp = await post(
-      Uri.parse('http://' + localIp + ':3001/building/submitDepositProposal'), //REMEMBER TO CHANGE IP ADDRESS
+      Uri.parse('http://' + widget.localIp + ':3001/building/submitDepositProposal'), //REMEMBER TO CHANGE IP ADDRESS
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer ' + authToken,
+        'Authorization': 'Bearer ' + widget.authToken,
       },
       body: jsonEncode(<String, dynamic>{
         'building_id': buildingId,
@@ -177,7 +188,7 @@ class RentPage extends StatelessWidget {
     List<int> value = hex.decode(data2);
     Uint8List encodedData = Uint8List.fromList(value);
     var tx;
-    tx = await provider.sendTransaction(from: accountAddress,
+    tx = await widget.provider.sendTransaction(from: widget.accountAddress,
         to: rentAddress, //TODO: Change this!!!!!!!!!!!!!!!!!!!!
         data: encodedData,
         nonce: nonce,
@@ -189,10 +200,10 @@ class RentPage extends StatelessWidget {
 
   void acceptDepositReturn(String buildingId, String tokenAddress, bool accepted) async {
     Response rsp = await post(
-      Uri.parse('http://' + localIp + ':3001/building/respondToProposal'), //REMEMBER TO CHANGE IP ADDRESS
+      Uri.parse('http://' + widget.localIp + ':3001/building/respondToProposal'), //REMEMBER TO CHANGE IP ADDRESS
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer ' + authToken,
+        'Authorization': 'Bearer ' + widget.authToken,
       },
       body: jsonEncode(<String, dynamic>{
         'building_id': buildingId,
@@ -209,7 +220,7 @@ class RentPage extends StatelessWidget {
     List<int> value = hex.decode(data2);
     Uint8List encodedData = Uint8List.fromList(value);
     var tx;
-    tx = await provider.sendTransaction(from: accountAddress,
+    tx = await widget.provider.sendTransaction(from: widget.accountAddress,
         to: rentAddress, //TODO: Change this!!!!!!!!!!!!!!!!!!!!
         data: encodedData,
         nonce: nonce,
@@ -219,11 +230,112 @@ class RentPage extends StatelessWidget {
     print(tx);
   }
 
+  beforeVoting() async {
+    Response rsp = await post(
+      Uri.parse('http://' + widget.localIp + ':3001/building/getPriceForTokens'),
+      //REMEMBER TO CHANGE IP ADDRESS
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer ' + widget.authToken,
+      },
+      body: jsonEncode(<String, dynamic>{
+        'building_id': "628b802a01929414d3cfaab8",
+        'tokenAmount': 1,
+        'tokenAddress': "0xe922e9152c588e9fceddd239f6aaf19b2eec0d6f",
+
+      }),
+    );
+
+    Map<String, dynamic> decodedRsp = json.decode(rsp.body);
+    String price = (double.parse(decodedRsp["price"]) / (pow(10, 18)))
+        .toString();
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+      return VotingPage(title: 'Voting',
+          authToken: widget.authToken,
+          localIp: widget.localIp,
+          accountAddress: widget.accountAddress,
+          provider: widget.provider, tokenAddress: "0xe922e9152c588e9fceddd239f6aaf19b2eec0d6f");
+    }));
+  }
+
+  beforeBuySell() async {
+
+    Response rsp = await post(
+      Uri.parse('http://' + widget.localIp + ':3001/building/getPriceForTokens'), //REMEMBER TO CHANGE IP ADDRESS
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer ' + widget.authToken,
+      },
+      body: jsonEncode(<String, dynamic>{
+        'building_id': "628b802a01929414d3cfaab8",
+        'tokenAmount': 1,
+        'tokenAddress': "0xe922e9152c588e9fceddd239f6aaf19b2eec0d6f",
+
+      }),
+    );
+
+    Map<String, dynamic> decodedRsp =json.decode(rsp.body);
+    String price = (double.parse(decodedRsp["price"])  / (pow(10,18)) ).toString();
+
+    /*Response rsp2 = await post(
+      Uri.parse('http://' + localIp + ':3001/building/getPriceForTokens'), //REMEMBER TO CHANGE IP ADDRESS
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer ' + authToken,
+      },
+      body: jsonEncode(<String, dynamic>{
+        'building_id': "628b802a01929414d3cfaab8",
+        'tokenAmount': 1,
+        'tokenAddress': "0xe922e9152c588e9fceddd239f6aaf19b2eec0d6f",
+
+      }),
+    );
+
+    Map<String, dynamic> decodedRsp2 =json.decode(rsp.body);
+    String price = (double.parse(decodedRsp2["price"])  / (pow(10,18)) ).toString();*/
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+
+      return BuySellPage(context: context,title: 'Buy / Sell', authToken: widget.authToken, localIp: widget.localIp,
+          accountAddress: widget.accountAddress, provider: widget.provider, currentPrice: price); //TODO: Check works properly
+
+    }));
+  }
+
+  Future<void> _onItemTapped(int index) async {
+    setState(() {
+      //_selectedIndex = index;
+    });
+    if(index == 0){
+      await beforeBuySell();
+    }
+    else if (index == 2) {
+      await beforeVoting();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
+        title: Text(widget.title),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.toll),
+            label: 'Trade',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.payments),
+            label: 'Rent',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.how_to_vote),
+            label: 'Governance',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
       ),
       body: Center(
         child: ListView(
