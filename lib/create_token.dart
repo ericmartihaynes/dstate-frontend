@@ -66,6 +66,7 @@ class _MyHomePageState extends State<TokenPage> {
       body: jsonEncode(<String, dynamic>{
         'name': name,
         'initial_amount': tokenAmount.toInt().toString(),
+        'symbol': 'PLACEHOLDER', //TODO: Change this
         'building_id': widget.buildingId,
         'rentPrice': (rentPrice * pow(10,18)).toInt(), //times 10**18
         'depositPrice': (depositPrice * pow(10,18)).toInt(), //times 10**18

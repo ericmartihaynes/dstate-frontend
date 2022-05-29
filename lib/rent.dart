@@ -20,20 +20,20 @@ import 'package:convert/convert.dart';
 final previousRentController = TextEditingController();
 final depositProposalController = TextEditingController();
 final depositAcceptRejectController = TextEditingController();
-const String tokenAddress = "0xC0FC39483F981eFf534cE1EbdCeFc1C312492d0a";
-const String rentAddress = "0x63a289Ba3f01b30b65E4871AbFc2B91384FDCa0d";
 int _selectedIndex = 1;
 
 class RentPage extends StatefulWidget {
   const RentPage(
-      {Key? key, required this.title, required this.authToken, required this.localIp, required this.accountAddress, required this.provider})
+      {Key? key, required this.title, required this.authToken, required this.localIp, required this.accountAddress, required this.provider, required this.buildingId, required this.tokenAddress, required this.rentAddress})
       : super(key: key);
   final String title;
   final String authToken;
   final String localIp;
   final String accountAddress;
   final EthereumWalletConnectProvider provider;
-  final int nonce = 29; //TODO get this from backend!!!!!!!!!!!!!!!!!
+  final String buildingId;
+  final String tokenAddress;
+  final String rentAddress;
   @override
   State<RentPage> createState() => _MyHomePageState();
 }
@@ -62,7 +62,7 @@ class _MyHomePageState extends State<RentPage> {
     Uint8List encodedData = Uint8List.fromList(value);
     var tx;
     tx = await widget.provider.sendTransaction(from: widget.accountAddress,
-        to: rentAddress, //TODO: Change this!!!!!!!!!!!!!!!!!!!!
+        to: widget.rentAddress, //TODO: Change this!!!!!!!!!!!!!!!!!!!!
         data: encodedData,
         nonce: nonce,
         gas: 1500000);
@@ -94,7 +94,7 @@ class _MyHomePageState extends State<RentPage> {
     Uint8List encodedData = Uint8List.fromList(value);
     var tx;
     tx = await widget.provider.sendTransaction(from: widget.accountAddress,
-        to: rentAddress, //TODO: Change this!!!!!!!!!!!!!!!!!!!!
+        to: widget.rentAddress, //TODO: Change this!!!!!!!!!!!!!!!!!!!!
         data: encodedData,
         value: rentPrice,
         nonce: nonce,
@@ -126,7 +126,7 @@ class _MyHomePageState extends State<RentPage> {
     Uint8List encodedData = Uint8List.fromList(value);
     var tx;
     tx = await widget.provider.sendTransaction(from: widget.accountAddress,
-        to: rentAddress, //TODO: Change this!!!!!!!!!!!!!!!!!!!!
+        to: widget.rentAddress, //TODO: Change this!!!!!!!!!!!!!!!!!!!!
         data: encodedData,
         nonce: nonce,
         gas: 1500000);
@@ -144,6 +144,7 @@ class _MyHomePageState extends State<RentPage> {
       },
       body: jsonEncode(<String, dynamic>{
         'building_id': buildingId,
+        'missed': previousRentNumber,
 
       }),
     );
@@ -157,7 +158,7 @@ class _MyHomePageState extends State<RentPage> {
     Uint8List encodedData = Uint8List.fromList(value);
     var tx;
     tx = await widget.provider.sendTransaction(from: widget.accountAddress,
-        to: rentAddress, //TODO: Change this!!!!!!!!!!!!!!!!!!!!
+        to: widget.rentAddress, //TODO: Change this!!!!!!!!!!!!!!!!!!!!
         data: encodedData,
         nonce: nonce,
         gas: 1500000);
@@ -189,7 +190,7 @@ class _MyHomePageState extends State<RentPage> {
     Uint8List encodedData = Uint8List.fromList(value);
     var tx;
     tx = await widget.provider.sendTransaction(from: widget.accountAddress,
-        to: rentAddress, //TODO: Change this!!!!!!!!!!!!!!!!!!!!
+        to: widget.rentAddress, //TODO: Change this!!!!!!!!!!!!!!!!!!!!
         data: encodedData,
         nonce: nonce,
         gas: 1500000);
@@ -221,7 +222,7 @@ class _MyHomePageState extends State<RentPage> {
     Uint8List encodedData = Uint8List.fromList(value);
     var tx;
     tx = await widget.provider.sendTransaction(from: widget.accountAddress,
-        to: rentAddress, //TODO: Change this!!!!!!!!!!!!!!!!!!!!
+        to: widget.rentAddress, //TODO: Change this!!!!!!!!!!!!!!!!!!!!
         data: encodedData,
         nonce: nonce,
         gas: 1500000);
@@ -239,9 +240,9 @@ class _MyHomePageState extends State<RentPage> {
         'Authorization': 'Bearer ' + widget.authToken,
       },
       body: jsonEncode(<String, dynamic>{
-        'building_id': "628b802a01929414d3cfaab8",
+        'building_id': widget.buildingId,
         'tokenAmount': 1,
-        'tokenAddress': "0xe922e9152c588e9fceddd239f6aaf19b2eec0d6f",
+        'tokenAddress': widget.tokenAddress,
 
       }),
     );
@@ -254,11 +255,14 @@ class _MyHomePageState extends State<RentPage> {
           authToken: widget.authToken,
           localIp: widget.localIp,
           accountAddress: widget.accountAddress,
-          provider: widget.provider, tokenAddress: "0xe922e9152c588e9fceddd239f6aaf19b2eec0d6f");
+          provider: widget.provider,
+          buildingId: widget.buildingId,
+          tokenAddress: widget.tokenAddress,
+          rentAddress: widget.rentAddress);
     }));
   }
 
-  beforeBuySell() async {
+  beforeBuySell(String tokenAddress) async {
 
     Response rsp = await post(
       Uri.parse('http://' + widget.localIp + ':3001/building/getPriceForTokens'), //REMEMBER TO CHANGE IP ADDRESS
@@ -267,9 +271,9 @@ class _MyHomePageState extends State<RentPage> {
         'Authorization': 'Bearer ' + widget.authToken,
       },
       body: jsonEncode(<String, dynamic>{
-        'building_id': "628b802a01929414d3cfaab8",
+        'building_id': widget.buildingId,
         'tokenAmount': 1,
-        'tokenAddress': "0xe922e9152c588e9fceddd239f6aaf19b2eec0d6f",
+        'tokenAddress': tokenAddress,
 
       }),
     );
@@ -277,26 +281,33 @@ class _MyHomePageState extends State<RentPage> {
     Map<String, dynamic> decodedRsp =json.decode(rsp.body);
     String price = (double.parse(decodedRsp["price"])  / (pow(10,18)) ).toString();
 
-    /*Response rsp2 = await post(
-      Uri.parse('http://' + localIp + ':3001/building/getPriceForTokens'), //REMEMBER TO CHANGE IP ADDRESS
+    Response rsp2 = await get(
+      Uri.parse('http://' + widget.localIp + ':3001/token/balanceOf?tokenAddress=' + tokenAddress), //REMEMBER TO CHANGE IP ADDRESS
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer ' + authToken,
+        'Authorization': 'Bearer ' + widget.authToken,
       },
-      body: jsonEncode(<String, dynamic>{
-        'building_id': "628b802a01929414d3cfaab8",
-        'tokenAmount': 1,
-        'tokenAddress': "0xe922e9152c588e9fceddd239f6aaf19b2eec0d6f",
-
-      }),
     );
 
-    Map<String, dynamic> decodedRsp2 =json.decode(rsp.body);
-    String price = (double.parse(decodedRsp2["price"])  / (pow(10,18)) ).toString();*/
+    Map<String, dynamic> decodedRsp2 =json.decode(rsp2.body);
+    String tokens = (decodedRsp2["balance"]).toString();
+
+    Response rsp3 = await get(
+      Uri.parse('http://' + widget.localIp + ':3001/users/balanceInEth'), //REMEMBER TO CHANGE IP ADDRESS
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer ' + widget.authToken,
+      },
+
+    );
+
+    Map<String, dynamic> decodedRsp3 =json.decode(rsp3.body);
+    String eth = (decodedRsp3["balance"]).toString();
+
     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
 
       return BuySellPage(context: context,title: 'Buy / Sell', authToken: widget.authToken, localIp: widget.localIp,
-          accountAddress: widget.accountAddress, provider: widget.provider, currentPrice: price); //TODO: Check works properly
+          accountAddress: widget.accountAddress, provider: widget.provider, currentPrice: price, currentTokenBalance: tokens, currentEthBalance: eth, buildingId: '62936fec385e672267bc77ee', tokenAddress: tokenAddress, rentAddress: '0x7aA7b5e70D361c3e1Fc9E24a841f1440276d0d74');
 
     }));
   }
@@ -306,7 +317,7 @@ class _MyHomePageState extends State<RentPage> {
       //_selectedIndex = index;
     });
     if(index == 0){
-      await beforeBuySell();
+      await beforeBuySell(widget.tokenAddress);
     }
     else if (index == 2) {
       await beforeVoting();
@@ -358,7 +369,7 @@ class _MyHomePageState extends State<RentPage> {
                   padding: const EdgeInsets.all(16.0),
                   textStyle: const TextStyle(fontSize: 22, fontFamily: 'Poppins'),
                 ),
-                onPressed: () => requestRent("628b802a01929414d3cfaab8", tokenAddress),
+                onPressed: () => requestRent(widget.buildingId, widget.tokenAddress),
                   //{/*628b802a01929414d3cfaab8*/ /*0xe922e9152c588e9fceddd239f6aaf19b2eec0d6f*/},
                 child: const Text('Request Rent'),
               ),
@@ -371,7 +382,7 @@ class _MyHomePageState extends State<RentPage> {
                   padding: const EdgeInsets.all(16.0),
                   textStyle: const TextStyle(fontSize: 22, fontFamily: 'Poppins'),
                 ),
-                onPressed: () => payRent("628b802a01929414d3cfaab8", tokenAddress),
+                onPressed: () => payRent(widget.buildingId, widget.tokenAddress),
                 //{/*628b802a01929414d3cfaab8*/ /*0xe922e9152c588e9fceddd239f6aaf19b2eec0d6f*/},
                 child: const Text('Pay Rent'),
               ),
@@ -384,7 +395,7 @@ class _MyHomePageState extends State<RentPage> {
                   padding: const EdgeInsets.all(16.0),
                   textStyle: const TextStyle(fontSize: 22, fontFamily: 'Poppins'),
                 ),
-                onPressed: () => withdrawRent("628b802a01929414d3cfaab8", tokenAddress),
+                onPressed: () => withdrawRent(widget.buildingId, widget.tokenAddress),
                 //{/*628b802a01929414d3cfaab8*/ /*0xe922e9152c588e9fceddd239f6aaf19b2eec0d6f*/},
                 child: const Text('Withdraw Rent'),
               ),
@@ -408,7 +419,7 @@ class _MyHomePageState extends State<RentPage> {
                   padding: const EdgeInsets.all(16.0),
                   textStyle: const TextStyle(fontSize: 22, fontFamily: 'Poppins'),
                 ),
-                onPressed: () => withdrawPreviousRent("628b802a01929414d3cfaab8", tokenAddress, int.parse(previousRentController.text)),
+                onPressed: () => withdrawPreviousRent(widget.buildingId, widget.tokenAddress, int.parse(previousRentController.text)),
                 //{/*628b802a01929414d3cfaab8*/ /*0xe922e9152c588e9fceddd239f6aaf19b2eec0d6f*/},
                 child: const Text('Withdraw Previous Rent'),
               ),
@@ -432,7 +443,7 @@ class _MyHomePageState extends State<RentPage> {
                   padding: const EdgeInsets.all(16.0),
                   textStyle: const TextStyle(fontSize: 22, fontFamily: 'Poppins'),
                 ),
-                onPressed: () => suggestDepositReturn("628b802a01929414d3cfaab8", tokenAddress, int.parse(depositProposalController.text)),
+                onPressed: () => suggestDepositReturn(widget.buildingId, widget.tokenAddress, int.parse(depositProposalController.text)),
                 //{/*628b802a01929414d3cfaab8*/ /*0xe922e9152c588e9fceddd239f6aaf19b2eec0d6f*/},
                 child: const Text('Suggest Deposit Return'),
               ),
@@ -455,7 +466,7 @@ class _MyHomePageState extends State<RentPage> {
                   padding: const EdgeInsets.all(16.0),
                   textStyle: const TextStyle(fontSize: 22, fontFamily: 'Poppins'),
                 ),
-                onPressed: () => acceptDepositReturn("628b802a01929414d3cfaab8", tokenAddress, depositAcceptRejectController.text == "true"),
+                onPressed: () => acceptDepositReturn(widget.buildingId, widget.tokenAddress, depositAcceptRejectController.text == "true"),
                 //{/*628b802a01929414d3cfaab8*/ /*0xe922e9152c588e9fceddd239f6aaf19b2eec0d6f*/},
                 child: const Text('Accept / Reject Deposit Return'),
               ),

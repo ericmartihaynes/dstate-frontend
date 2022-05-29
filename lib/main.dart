@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:dstate/buy_sell.dart';
+import 'package:dstate/register.dart';
 import 'package:dstate/rent.dart';
 import 'package:dstate/tokenize_building.dart';
 import 'package:flutter/material.dart';
@@ -121,7 +122,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   //Via: 10.154.200.10
   //Kamtjatka: 10.20.11.1
-  String localIp = "10.20.11.1"; //TODO Change ip
+  String localIp = "10.154.200.23"; //TODO Change ip
 
 
 
@@ -143,20 +144,7 @@ class _MyHomePageState extends State<MyHomePage> {
     //CHANGE TO JSON CALL
   }
 
-  Future<Response> sendPost(String publicAddress) {
-    return post(
-      Uri.parse('http://' + localIp + ':3001/users'), //REMEMBER TO CHANGE IP ADDRESS
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, String>{
-        'publicAddress': publicAddress,
-        'email': "test2@test.com",
-        'userName': "flutterTest2",
-      }),
-    );
-    //CHANGE TO JSON CALL
-  }
+
 
   Future<Response> getJWT(String publicAddress, String signature) {
     print(publicAddress);
@@ -220,10 +208,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
       //first time user
       if(decoded["users"].length == 0){
-        Response response2 = await sendPost(accountAddress);
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+
+          return RegisterPage(title: "Dstate", provider: provider, localIp: localIp, accountAddress: accountAddress);
+
+        }));
+        /*Response response2 = await sendPost(accountAddress);
         Map<String, dynamic> decoded2 =json.decode(response2.body);
         user = decoded2["user"];
-        print("first time");
+        print("first time");*/
 
 
       }
@@ -282,9 +275,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
       //first time user
       if(decoded["users"].length == 0){
-        Response response2 = await sendPost(accountAddress);
-        Map<String, dynamic> decoded2 =json.decode(response2.body);
-        user = decoded2["user"];
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+
+          return RegisterPage(title: "Dstate", provider: provider, localIp: localIp, accountAddress: accountAddress);
+
+        }));
 
 
       }
@@ -350,7 +345,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
 
-                  return MenuPage(title: "Dstate", provider: provider, authToken: authToken, localIp: localIp);
+                  return MenuPage(title: "Dstate", provider: provider, authToken: authToken, localIp: localIp, accountAddress: accountAddress);
 
                 })),
                 child: Text(uiMetamaskConnected ? "Enter" : ""),

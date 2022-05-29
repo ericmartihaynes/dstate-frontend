@@ -25,13 +25,11 @@ final uint1Controller = TextEditingController();
 final uint2Controller = TextEditingController();
 final address0Controller = TextEditingController();
 final proposalIdController = TextEditingController();
-const String tokenAddress = "0xC0FC39483F981eFf534cE1EbdCeFc1C312492d0a";
-const String rentAddress = "0x63a289Ba3f01b30b65E4871AbFc2B91384FDCa0d";
 int _selectedIndex = 2;
 
 class VotingPage extends StatefulWidget {
   const VotingPage(
-      {Key? key, required this.title, required this.authToken, required this.localIp, required this.accountAddress, required this.provider, required this.tokenAddress})
+      {Key? key, required this.title, required this.authToken, required this.localIp, required this.accountAddress, required this.provider,  required this.buildingId, required this.tokenAddress, required this.rentAddress})
       : super(key: key);
   final String title;
   final String authToken;
@@ -39,7 +37,8 @@ class VotingPage extends StatefulWidget {
   final String accountAddress;
   final EthereumWalletConnectProvider provider;
   final String tokenAddress;
-  final int nonce = 29; //TODO get this from backend!!!!!!!!!!!!!!!!!
+  final String buildingId;
+  final String rentAddress;
   @override
   State<VotingPage> createState() => _MyHomePageState();
 }
@@ -47,13 +46,14 @@ class VotingPage extends StatefulWidget {
 class _MyHomePageState extends State<VotingPage> {
   void createProposal(String buildingId, String tokenAddress, String title, String description, int proposalType, int uint0, int uint1, int uint2, String address0) async {
     Response rsp = await post(
-      Uri.parse('http://' + widget.localIp + ':3001/building/????'), //TODO: add route
+      Uri.parse('http://' + widget.localIp + ':3001/token/createProposal'), //TODO: add route
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer ' + widget.authToken,
       },
       body: jsonEncode(<String, dynamic>{
         'building_id': buildingId,
+        'tokenAddress':tokenAddress,
         'title':title,
         'description':description,
         'proposalType':proposalType,
@@ -84,14 +84,14 @@ class _MyHomePageState extends State<VotingPage> {
 
   void vote(String buildingId, String tokenAddress,int proposalId) async {
     Response rsp = await post(
-      Uri.parse('http://' + widget.localIp + ':3001/building/????'), //TODO: add route
+      Uri.parse('http://' + widget.localIp + ':3001/token/submitVote'), //TODO: add route
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer ' + widget.authToken,
       },
       body: jsonEncode(<String, dynamic>{
         'building_id': buildingId,
-        'title':widget.title,
+        'tokenAddress':tokenAddress,
         'proposalId':proposalId,
       }),
     );
@@ -123,9 +123,9 @@ class _MyHomePageState extends State<VotingPage> {
         'Authorization': 'Bearer ' + widget.authToken,
       },
       body: jsonEncode(<String, dynamic>{
-        'building_id': "628b802a01929414d3cfaab8",
+        'building_id': widget.buildingId,
         'tokenAmount': 1,
-        'tokenAddress': "0xe922e9152c588e9fceddd239f6aaf19b2eec0d6f",
+        'tokenAddress': widget.tokenAddress,
 
       }),
     );
@@ -138,11 +138,14 @@ class _MyHomePageState extends State<VotingPage> {
           authToken: widget.authToken,
           localIp: widget.localIp,
           accountAddress: widget.accountAddress,
-          provider: widget.provider);
+          provider: widget.provider,
+          buildingId: widget.buildingId,
+          tokenAddress: widget.tokenAddress,
+          rentAddress: widget.rentAddress);
     }));
   }
 
-  beforeBuySell() async {
+  beforeBuySell(String tokenAddress) async {
 
     Response rsp = await post(
       Uri.parse('http://' + widget.localIp + ':3001/building/getPriceForTokens'), //REMEMBER TO CHANGE IP ADDRESS
@@ -151,9 +154,9 @@ class _MyHomePageState extends State<VotingPage> {
         'Authorization': 'Bearer ' + widget.authToken,
       },
       body: jsonEncode(<String, dynamic>{
-        'building_id': "628b802a01929414d3cfaab8",
+        'building_id': widget.buildingId,
         'tokenAmount': 1,
-        'tokenAddress': "0xe922e9152c588e9fceddd239f6aaf19b2eec0d6f",
+        'tokenAddress': tokenAddress,
 
       }),
     );
@@ -161,26 +164,33 @@ class _MyHomePageState extends State<VotingPage> {
     Map<String, dynamic> decodedRsp =json.decode(rsp.body);
     String price = (double.parse(decodedRsp["price"])  / (pow(10,18)) ).toString();
 
-    /*Response rsp2 = await post(
-      Uri.parse('http://' + localIp + ':3001/building/getPriceForTokens'), //REMEMBER TO CHANGE IP ADDRESS
+    Response rsp2 = await get(
+      Uri.parse('http://' + widget.localIp + ':3001/token/balanceOf?tokenAddress=' + tokenAddress), //REMEMBER TO CHANGE IP ADDRESS
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer ' + authToken,
+        'Authorization': 'Bearer ' + widget.authToken,
       },
-      body: jsonEncode(<String, dynamic>{
-        'building_id': "628b802a01929414d3cfaab8",
-        'tokenAmount': 1,
-        'tokenAddress': "0xe922e9152c588e9fceddd239f6aaf19b2eec0d6f",
-
-      }),
     );
 
-    Map<String, dynamic> decodedRsp2 =json.decode(rsp.body);
-    String price = (double.parse(decodedRsp2["price"])  / (pow(10,18)) ).toString();*/
+    Map<String, dynamic> decodedRsp2 =json.decode(rsp2.body);
+    String tokens = (decodedRsp2["balance"]).toString();
+
+    Response rsp3 = await get(
+      Uri.parse('http://' + widget.localIp + ':3001/users/balanceInEth'), //REMEMBER TO CHANGE IP ADDRESS
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer ' + widget.authToken,
+      },
+
+    );
+
+    Map<String, dynamic> decodedRsp3 =json.decode(rsp3.body);
+    String eth = (decodedRsp3["balance"]).toString();
+
     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
 
       return BuySellPage(context: context,title: 'Buy / Sell', authToken: widget.authToken, localIp: widget.localIp,
-          accountAddress: widget.accountAddress, provider: widget.provider, currentPrice: price); //TODO: Check works properly
+          accountAddress: widget.accountAddress, provider: widget.provider, currentPrice: price, currentTokenBalance: tokens, currentEthBalance: eth, buildingId: '62936fec385e672267bc77ee', tokenAddress: tokenAddress, rentAddress: '0x7aA7b5e70D361c3e1Fc9E24a841f1440276d0d74');
 
     }));
   }
@@ -190,7 +200,7 @@ class _MyHomePageState extends State<VotingPage> {
       //_selectedIndex = index;
     });
     if(index == 0){
-      await beforeBuySell();
+      await beforeBuySell(widget.tokenAddress);
     }
     else if (index == 1) {
       await beforeRent();
@@ -316,7 +326,7 @@ class _MyHomePageState extends State<VotingPage> {
                   padding: const EdgeInsets.all(16.0),
                   textStyle: const TextStyle(fontSize: 22, fontFamily: 'Poppins'),
                 ),
-                onPressed: () => createProposal("628b802a01929414d3cfaab8", tokenAddress, titleController.text, descriptionController.text, int.parse(proposalTypeController.text), int.parse(uint0Controller.text), int.parse(uint1Controller.text), int.parse(uint2Controller.text), address0Controller.text),
+                onPressed: () => createProposal(widget.buildingId, widget.tokenAddress, titleController.text, descriptionController.text, int.parse(proposalTypeController.text), int.parse(uint0Controller.text), int.parse(uint1Controller.text), int.parse(uint2Controller.text), address0Controller.text),
                 //{/*628b802a01929414d3cfaab8*/ /*0xe922e9152c588e9fceddd239f6aaf19b2eec0d6f*/},
                 child: const Text('Create Proposal'),
               ),
@@ -340,7 +350,7 @@ class _MyHomePageState extends State<VotingPage> {
                   padding: const EdgeInsets.all(16.0),
                   textStyle: const TextStyle(fontSize: 22, fontFamily: 'Poppins'),
                 ),
-                onPressed: () => vote("628b802a01929414d3cfaab8", tokenAddress, int.parse(proposalIdController.text)),
+                onPressed: () => vote(widget.buildingId, widget.tokenAddress, int.parse(proposalIdController.text)),
                 //{/*628b802a01929414d3cfaab8*/ /*0xe922e9152c588e9fceddd239f6aaf19b2eec0d6f*/},
                 child: const Text('Vote'),
               ),

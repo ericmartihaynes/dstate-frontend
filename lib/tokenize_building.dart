@@ -19,7 +19,7 @@ import 'create_token.dart';
 
 
 class TokenizePage extends StatefulWidget {
-  const TokenizePage ({Key? key, required this.title, required this.provider, required this.authToken, required this.localIp}) : super(key: key);
+  const TokenizePage ({Key? key, required this.title, required this.provider, required this.authToken, required this.localIp, required this.accountAddress}) : super(key: key);
 
 
   // This widget is the home page of your application. It is stateful, meaning
@@ -35,6 +35,7 @@ class TokenizePage extends StatefulWidget {
   final EthereumWalletConnectProvider provider;
   final String authToken;
   final String localIp;
+  final String accountAddress;
 
 
 
@@ -48,7 +49,6 @@ class _MyHomePageState extends State<TokenizePage> {
   final amountController = TextEditingController();
   final buildingNameController = TextEditingController();
   final buildingAddressController = TextEditingController();
-  String accountAddress = ""; //TODO: get this!!!!!!!!!!!!!!
   String buildingId = "";
  //TODO Change ip
 
@@ -93,7 +93,7 @@ class _MyHomePageState extends State<TokenizePage> {
     //Uint8List encodedData = encoder.convert(data);
     Uint8List encodedData = Uint8List.fromList(value);
 
-    final tx = await widget.provider.sendTransaction(from: accountAddress, data: encodedData, nonce: nonce,gas: 1500000);
+    final tx = await widget.provider.sendTransaction(from: widget.accountAddress, data: encodedData, nonce: nonce,gas: 1500000);
     print("Deployed!");
     print(tx);
 
@@ -133,7 +133,7 @@ class _MyHomePageState extends State<TokenizePage> {
 
     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
 
-      return TokenPage(title: "Create Token", provider: widget.provider, authToken: widget.authToken, localIp: widget.localIp, buildingId: buildingId, accountAddress: accountAddress);
+      return TokenPage(title: "Create Token", provider: widget.provider, authToken: widget.authToken, localIp: widget.localIp, buildingId: buildingId, accountAddress: widget.accountAddress);
 
     }));
   }
@@ -149,7 +149,7 @@ class _MyHomePageState extends State<TokenizePage> {
     //Uint8List encodedData = encoder.convert(data);
     Uint8List encodedData = Uint8List.fromList(value);
 
-    final tx = await widget.provider.sendTransaction(from: accountAddress, data: encodedData, gas: 15000000);
+    final tx = await widget.provider.sendTransaction(from: widget.accountAddress, data: encodedData, gas: 15000000);
     print("Deployed!");
     print(tx);
 

@@ -18,7 +18,7 @@ import 'package:convert/convert.dart';
 
 
 class MenuPage extends StatefulWidget {
-  const MenuPage ({Key? key, required this.title, required this.provider, required this.authToken, required this.localIp}) : super(key: key);
+  const MenuPage ({Key? key, required this.title, required this.provider, required this.authToken, required this.localIp, required this.accountAddress}) : super(key: key);
 
 
   // This widget is the home page of your application. It is stateful, meaning
@@ -34,6 +34,7 @@ class MenuPage extends StatefulWidget {
   final EthereumWalletConnectProvider provider;
   final String authToken;
   final String localIp;
+  final String accountAddress;
 
 
 
@@ -47,8 +48,7 @@ class _MyHomePageState extends State<MenuPage> {
   final amountController = TextEditingController();
   final buildingNameController = TextEditingController();
   final buildingAddressController = TextEditingController();
-  String accountAddress = "";
-  String buildingId = "";
+  String buildingId2 = '62936fec385e672267bc77ee';
   //TODO Change ip
 
   //Send data to backend
@@ -64,7 +64,7 @@ class _MyHomePageState extends State<MenuPage> {
         'name': name,
         'initial_amount': tokenAmount.toInt().toString(),
         'symbol': "DST1",
-        'building_id': buildingId,
+        'building_id': buildingId2,
         'building_name': 'Train Station',
         'building_address': 'Horsens',
         'rentPrice': 1000000000000000000,
@@ -78,7 +78,7 @@ class _MyHomePageState extends State<MenuPage> {
     //CHANGE TO JSON CALL
   }
 
-  beforeBuySell() async {
+  beforeBuySell(String tokenAddress) async {
 
     Response rsp = await post(
       Uri.parse('http://' + widget.localIp + ':3001/building/getPriceForTokens'), //REMEMBER TO CHANGE IP ADDRESS
@@ -87,9 +87,9 @@ class _MyHomePageState extends State<MenuPage> {
         'Authorization': 'Bearer ' + widget.authToken,
       },
       body: jsonEncode(<String, dynamic>{
-        'building_id': "628b802a01929414d3cfaab8",
+        'building_id': buildingId2,
         'tokenAmount': 1,
-        'tokenAddress': "0xe922e9152c588e9fceddd239f6aaf19b2eec0d6f",
+        'tokenAddress': tokenAddress,
 
       }),
     );
@@ -97,26 +97,33 @@ class _MyHomePageState extends State<MenuPage> {
     Map<String, dynamic> decodedRsp =json.decode(rsp.body);
     String price = (double.parse(decodedRsp["price"])  / (pow(10,18)) ).toString();
 
-    /*Response rsp2 = await post(
-      Uri.parse('http://' + localIp + ':3001/building/getPriceForTokens'), //REMEMBER TO CHANGE IP ADDRESS
+    Response rsp2 = await get(
+      Uri.parse('http://' + widget.localIp + ':3001/token/balanceOf?tokenAddress=' + tokenAddress), //REMEMBER TO CHANGE IP ADDRESS
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer ' + authToken,
+        'Authorization': 'Bearer ' + widget.authToken,
       },
-      body: jsonEncode(<String, dynamic>{
-        'building_id': "628b802a01929414d3cfaab8",
-        'tokenAmount': 1,
-        'tokenAddress': "0xe922e9152c588e9fceddd239f6aaf19b2eec0d6f",
-
-      }),
     );
 
-    Map<String, dynamic> decodedRsp2 =json.decode(rsp.body);
-    String price = (double.parse(decodedRsp2["price"])  / (pow(10,18)) ).toString();*/
+    Map<String, dynamic> decodedRsp2 =json.decode(rsp2.body);
+    String tokens = (decodedRsp2["balance"]).toString();
+
+    Response rsp3 = await get(
+      Uri.parse('http://' + widget.localIp + ':3001/token/balanceInEth'), //REMEMBER TO CHANGE IP ADDRESS
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer ' + widget.authToken,
+      },
+
+    );
+    print(rsp3.body);
+    Map<String, dynamic> decodedRsp3 =json.decode(rsp3.body);
+    String eth = (decodedRsp3["balance"]).toString();
+
     Navigator.push(context, MaterialPageRoute(builder: (context) {
 
       return BuySellPage(context: context,title: 'Buy / Sell', authToken: widget.authToken, localIp: widget.localIp,
-          accountAddress: accountAddress, provider: widget.provider, currentPrice: price);
+          accountAddress: widget.accountAddress, provider: widget.provider, currentPrice: price, currentTokenBalance: tokens, currentEthBalance: eth, buildingId: buildingId2, tokenAddress: tokenAddress, rentAddress: '0x7aA7b5e70D361c3e1Fc9E24a841f1440276d0d74');
 
     }));
   }
@@ -173,14 +180,14 @@ class _MyHomePageState extends State<MenuPage> {
               ListTile(
                 leading: Icon(Icons.location_city),
                 title: const Text('Buildings'),
-                onTap: () async { beforeBuySell(); },
+                onTap: () async { beforeBuySell('0x06c6005575b12e691046DCD52CBD0e3e1A8FF9a4'); },
               ),
               ListTile(
                 leading: Icon(Icons.domain_add),
                 title: const Text('Tokenize'),
                 onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) {
 
-                return TokenizePage(title: "Tokenize", provider: widget.provider, authToken: widget.authToken, localIp: widget.localIp);
+                return TokenizePage(title: "Tokenize", provider: widget.provider, authToken: widget.authToken, localIp: widget.localIp, accountAddress: widget.accountAddress);
 
                 })),
               ),

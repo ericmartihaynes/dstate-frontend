@@ -22,14 +22,13 @@ final pricePerTokenController = TextEditingController();
 final amountToSellController = TextEditingController();
 final amountToBuyController = TextEditingController();
 final amountToCancelController = TextEditingController();
-const String tokenAddress = "0xSomethinghere";
 int _selectedIndex = 0;
 
 
 
 class BuySellPage extends StatefulWidget {
   const BuySellPage(
-      {Key? key, required this.context, required this.title, required this.authToken, required this.localIp, required this.accountAddress, required this.provider, required this.currentPrice})
+      {Key? key, required this.context, required this.title, required this.authToken, required this.localIp, required this.accountAddress, required this.provider, required this.currentPrice, required this.currentTokenBalance,  required this.currentEthBalance, required this.buildingId, required this.tokenAddress, required this.rentAddress})
       : super(key: key);
   final BuildContext context;
   final String title;
@@ -38,6 +37,11 @@ class BuySellPage extends StatefulWidget {
   final String accountAddress;
   final EthereumWalletConnectProvider provider;
   final String currentPrice;
+  final String currentTokenBalance;
+  final String currentEthBalance;
+  final String buildingId;
+  final String tokenAddress;
+  final String rentAddress;
 
   @override
   State<BuySellPage> createState() => _MyHomePageState();
@@ -177,9 +181,9 @@ class _MyHomePageState extends State<BuySellPage> {
         'Authorization': 'Bearer ' + widget.authToken,
       },
       body: jsonEncode(<String, dynamic>{
-        'building_id': "628b802a01929414d3cfaab8",
+        'building_id': widget.buildingId,
         'tokenAmount': 1,
-        'tokenAddress': "0xe922e9152c588e9fceddd239f6aaf19b2eec0d6f",
+        'tokenAddress': widget.tokenAddress,
 
       }),
     );
@@ -192,7 +196,10 @@ class _MyHomePageState extends State<BuySellPage> {
           authToken: widget.authToken,
           localIp: widget.localIp,
           accountAddress: widget.accountAddress,
-          provider: widget.provider, tokenAddress: "0xe922e9152c588e9fceddd239f6aaf19b2eec0d6f");
+          provider: widget.provider,
+          buildingId: widget.buildingId,
+          tokenAddress: widget.tokenAddress,
+          rentAddress: widget.rentAddress);
     }));
   }
 
@@ -205,9 +212,9 @@ class _MyHomePageState extends State<BuySellPage> {
         'Authorization': 'Bearer ' + widget.authToken,
       },
       body: jsonEncode(<String, dynamic>{
-        'building_id': "628b802a01929414d3cfaab8",
+        'building_id': widget.buildingId,
         'tokenAmount': 1,
-        'tokenAddress': "0xe922e9152c588e9fceddd239f6aaf19b2eec0d6f",
+        'tokenAddress': widget.tokenAddress,
 
       }),
     );
@@ -220,7 +227,10 @@ class _MyHomePageState extends State<BuySellPage> {
           authToken: widget.authToken,
           localIp: widget.localIp,
           accountAddress: widget.accountAddress,
-          provider: widget.provider);
+          provider: widget.provider,
+      buildingId: widget.buildingId,
+      tokenAddress: widget.tokenAddress,
+      rentAddress: widget.rentAddress);
     }));
   }
 
@@ -280,17 +290,17 @@ class _MyHomePageState extends State<BuySellPage> {
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
-            const Padding(
+            Padding(
               padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               child: Text(
-                '55 tokens',
+                widget.currentTokenBalance + ' tokens',
                 textAlign: TextAlign.center,
               ),
             ),
-            const Padding(
+            Padding(
               padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               child: Text(
-                '1.85 ether',
+                widget.currentEthBalance + ' Ξ',
                 textAlign: TextAlign.center,
               ),
             ),
@@ -325,7 +335,7 @@ class _MyHomePageState extends State<BuySellPage> {
                   padding: const EdgeInsets.all(16.0),
                   textStyle: const TextStyle(fontSize: 22, fontFamily: 'Poppins'),
                 ),
-                onPressed: () => sellToken(double.parse(pricePerTokenController.text), double.parse(amountToSellController.text), "628b802a01929414d3cfaab8", "0xe922e9152c588e9fceddd239f6aaf19b2eec0d6f"),
+                onPressed: () => sellToken(double.parse(pricePerTokenController.text), double.parse(amountToSellController.text), widget.buildingId, widget.tokenAddress),
                   //{/*628b802a01929414d3cfaab8*/ /*0xe922e9152c588e9fceddd239f6aaf19b2eec0d6f*/},
                 child: const Text('Sell Tokens'),
               ),
@@ -358,7 +368,7 @@ class _MyHomePageState extends State<BuySellPage> {
                   padding: const EdgeInsets.all(16.0),
                   textStyle: const TextStyle(fontSize: 22, fontFamily: 'Poppins'),
                 ),
-                onPressed: () => buyToken(double.parse(amountToBuyController.text), "628b802a01929414d3cfaab8", "0xe922e9152c588e9fceddd239f6aaf19b2eec0d6f"),
+                onPressed: () => buyToken(double.parse(amountToBuyController.text), widget.buildingId, widget.tokenAddress),
                 child: const Text('Buy Tokens'),
               ),
             ),
@@ -389,38 +399,11 @@ class _MyHomePageState extends State<BuySellPage> {
                   padding: const EdgeInsets.all(16.0),
                   textStyle: const TextStyle(fontSize: 22, fontFamily: 'Poppins'),
                 ),
-                onPressed: () => cancelToken(double.parse(amountToCancelController.text), "628b802a01929414d3cfaab8", "0xe922e9152c588e9fceddd239f6aaf19b2eec0d6f"),
+                onPressed: () => cancelToken(double.parse(amountToCancelController.text), widget.buildingId, widget.tokenAddress),
                 child: const Text('Cancel Sale'),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 125, vertical: 16),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  primary: Colors.lightBlueAccent,
-                  padding: const EdgeInsets.all(16.0),
-                  textStyle: const TextStyle(fontSize: 22, fontFamily: 'Poppins'),
-                ),
-                onPressed: () async { beforeRent(); },
-
-                child: const Text('Rent'),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 125, vertical: 16),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  primary: Colors.purpleAccent,
-                  padding: const EdgeInsets.all(16.0),
-                  textStyle: const TextStyle(fontSize: 22, fontFamily: 'Poppins'),
-                ),
-                onPressed: () async { beforeVoting(); },
-
-                child: const Text('Voting'),
-              ),
-            ),
-
-
+            
           ],
 
         ),
