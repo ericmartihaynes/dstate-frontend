@@ -32,6 +32,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
         // This is the theme of your application.
@@ -93,6 +94,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String accountAddress = "";
   String authToken = "";
   String buildingId = "";
+  bool isDialogShown = false;
   final connector = WalletConnect(
     bridge: 'https://bridge.walletconnect.org',
     clientMeta: const PeerMeta(
@@ -122,7 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   //Via: 10.154.200.10
   //Kamtjatka: 10.20.11.1
-  String localIp = "10.154.200.23"; //TODO Change ip
+  String localIp = "10.20.11.1"; //TODO Change ip
 
 
 
@@ -228,8 +230,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
       String nonce = user["nonce"].toString();
       String msg = "I am signing my one-time nonce: " + nonce;//I am signing my one-time nonce: ${user.nonce}
+      isDialogShown = true;
+      _showDialog(context);
       //Shout-out to HaoCherHong for finding a fix for this and adding personalSign to the walletconnect_dart library :)
       String signature = await provider.personalSign(message: msg, address: accountAddress, password: "test password");
+      if(isDialogShown){Navigator.pop(context);}
+
+      
 
       print(signature);
       print(accountAddress);
@@ -298,6 +305,23 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  _showDialog(BuildContext context) {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(32.0))),
+            backgroundColor: Colors.white,
+            title: const Text('Confirm Operation in Wallet',
+            style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+            ),
+            actions: <Widget>[
+              Center(child: Image.asset('assets/metamask.gif')),
+            ],
+          );
+        }
+    ).whenComplete(() => isDialogShown = false);
+  }
 
 
 
