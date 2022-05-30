@@ -74,7 +74,7 @@ class _MyHomePageState extends State<TokenPage> {
         'caretakerShare': caretakerShare,
         'caretaker': caretaker,
         'tenant': tenant
-      }), //TODO: Add fields for this data ^ and change hardcoded
+      }),
     );
     //CHANGE TO JSON CALL
   }
@@ -102,7 +102,7 @@ class _MyHomePageState extends State<TokenPage> {
     print(tx);
 
     return post(
-      Uri.parse('http://' + widget.localIp + ':3001/building/createToken'), //REMEMBER TO CHANGE IP ADDRESS
+      Uri.parse('http://' + widget.localIp + ':3001/building/createToken'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer ' + widget.authToken,
@@ -111,9 +111,9 @@ class _MyHomePageState extends State<TokenPage> {
         'name': name,
         'initial_amount': tokenAmount.toInt().toString(),
         'building_id': buildingId,
-        'symbol': "DST11",
+        'symbol': "DST11", //TODO: look into this
         'transactionHash' : tx,
-      }),//TODO: look into this
+      }),
     );
   }
 
@@ -144,9 +144,6 @@ class _MyHomePageState extends State<TokenPage> {
     //CHANGE TO JSON CALL
   }
 
-
-  //Connect to Wallet
-  //TODO: Make walletConnect work if metamask is already open ?
 
   _showDialog(BuildContext context) {
     return showDialog(

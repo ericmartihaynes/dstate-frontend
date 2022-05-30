@@ -120,19 +120,9 @@ class _MyHomePageState extends State<MyHomePage> {
   ));
 
 
-
-
-
   //Via: 10.154.200.10
   //Kamtjatka: 10.20.11.1
   String localIp = "10.20.11.1"; //TODO Change ip
-
-
-
-
-
-
-
 
 
   Future<Response> fetchUsers(String publicAddress) {
@@ -165,7 +155,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   //Connect to Wallet
-  //TODO: Make walletConnect work if metamask is already open ?
+
   _walletConnect() async {
     //Wallet Connect Mobile
     if(Theme.of(context).platform == TargetPlatform.iOS || Theme.of(context).platform == TargetPlatform.android) {
@@ -252,10 +242,10 @@ class _MyHomePageState extends State<MyHomePage> {
         uiMetamaskConnected = true;
       });
 
+      beforeMenu();
 
 
 
-      //TODO: send signature to backend
 
 
 
@@ -301,7 +291,7 @@ class _MyHomePageState extends State<MyHomePage> {
       //String signature = await provider.sign(message: "0x5C783139457468657265756D205369676E6564204D6573736167653A5C6E3168", address: accountAddress);
 
       //print(signature);
-      //TODO: send signature to backend
+
 
     }
   }
@@ -325,9 +315,68 @@ class _MyHomePageState extends State<MyHomePage> {
     ).whenComplete(() => isDialogShown = false);
   }
 
+  beforeMenu() async {
+    List<Widget> tokens = [];
+    Response rsp = await get(
+      Uri.parse('http://' + localIp + ':3001/users/profile?publicAddress=' + accountAddress),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer ' + authToken,
+      },
+    ); //TODO: fix error
+    Map<String, dynamic> decodedRsp =json.decode(rsp.body);
+    print(decodedRsp);
+    Widget token = Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Card(
+        shadowColor: Colors.deepOrange,
+        elevation: 8,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.purpleAccent, Colors.deepOrange],
+              begin: Alignment.topRight,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+          padding: EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '500 VIA',
+                style: TextStyle(
+                  fontSize: 20,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '0x5f70ab98ce78ad115f105f70ab98ce78ad115f10',
+                style: TextStyle(
+                  fontSize: 20,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
 
 
+    tokens.add(token);
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
 
+      return MenuPage(title: "Dstate", provider: provider, authToken: authToken, localIp: localIp, accountAddress: accountAddress, tokens: tokens);
+
+    }));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -346,11 +395,12 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
-        child: ListView(
+        child: Column(
           //crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 260),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
@@ -360,23 +410,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 onPressed: () async => _walletConnect(),
                 child: Text(uiMetamaskConnected ? "Connected" : "Connect Wallet"),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 125, vertical: 16),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-                  primary: uiMetamaskConnected ? Colors.deepPurple : Colors.black12,
-                  padding: const EdgeInsets.all(16.0),
-                  textStyle: const TextStyle(fontSize: 22, fontFamily: 'Poppins'),
-                ),
-                onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
-
-                  return MenuPage(title: "Dstate", provider: provider, authToken: authToken, localIp: localIp, accountAddress: accountAddress);
-
-                })),
-                child: Text(uiMetamaskConnected ? "Enter" : ""),
               ),
             ),
 

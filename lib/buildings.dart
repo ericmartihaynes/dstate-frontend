@@ -54,32 +54,7 @@ class _MyHomePageState extends State<BuildingsPage> {
   final buildingAddressController = TextEditingController();
   String buildingId2 = '62936fec385e672267bc77ee';
 
-  //Send data to backend
-  Future<Response> sendData(String name, double tokenAmount) {
-    print(name + " " + tokenAmount.toString());
-    return post(
-      Uri.parse('http://' + widget.localIp + ':3001/building/deploy'), //REMEMBER TO CHANGE IP ADDRESS
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer ' + widget.authToken,
-      },
-      body: jsonEncode(<String, dynamic>{
-        'name': name,
-        'initial_amount': tokenAmount.toInt().toString(),
-        'symbol': "DST1",
-        'building_id': buildingId2,
-        'building_name': 'Train Station',
-        'building_address': 'Horsens',
-        'rentPrice': 1000000000000000000,
-        'depositPrice': 2000000000000000000,
-        'remainingMonths': 7,
-        'caretakerShare': 10,
-        'caretaker': '0x7176bd09199068e21be4137d1630fb8712633445',
-        'tenant': '0x7176bd09199068e21be4137d1630fb8712633445'
-      }), //TODO: Add fields for this data ^ and change hardcoded
-    );
-    //CHANGE TO JSON CALL
-  }
+
 
   beforeBuySell(String tokenAddress) async {
 
@@ -131,7 +106,17 @@ class _MyHomePageState extends State<BuildingsPage> {
     }));
   }
 
+  beforeMenu() {
+    List<Widget> tokens = [];
+      Navigator.pop(context);
+      Navigator.pop(context);
+      Navigator.pop(context);
+    /*Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
 
+      return MenuPage(title: "Dstate", provider: widget.provider, authToken: widget.authToken, localIp: widget.localIp, accountAddress: widget.accountAddress, tokens: tokens);
+
+    }));*/
+  }
 
 
   @override
@@ -177,12 +162,7 @@ class _MyHomePageState extends State<BuildingsPage> {
               leading: Icon(Icons.account_balance_wallet),
               title: Text('Portfolio'),
               onTap: () {
-                //TODO: Navigator
-                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
-
-                  return MenuPage(title: "Dstate", provider: widget.provider, authToken: widget.authToken, localIp: widget.localIp, accountAddress: widget.accountAddress);
-
-                }));
+                beforeMenu();
               },
             ),
             ListTile(

@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:dstate/rent.dart';
+import 'package:dstate/voting.dart';
 import 'package:flutter/cupertino.dart';
 import 'dart:typed_data';
 
@@ -27,9 +28,9 @@ final address0Controller = TextEditingController();
 final proposalIdController = TextEditingController();
 int _selectedIndex = 2;
 
-class VotingPage extends StatefulWidget {
-  const VotingPage(
-      {Key? key, required this.title, required this.authToken, required this.localIp, required this.accountAddress, required this.provider,  required this.buildingId, required this.tokenAddress, required this.rentAddress})
+class ProposalsPage extends StatefulWidget {
+  const ProposalsPage(
+      {Key? key, required this.title, required this.authToken, required this.localIp, required this.accountAddress, required this.provider,  required this.buildingId, required this.tokenAddress, required this.rentAddress, required this.proposals})
       : super(key: key);
   final String title;
   final String authToken;
@@ -39,13 +40,45 @@ class VotingPage extends StatefulWidget {
   final String tokenAddress;
   final String buildingId;
   final String rentAddress;
+  final List<Widget> proposals;
   @override
-  State<VotingPage> createState() => _MyHomePageState();
+  State<ProposalsPage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<VotingPage> {
+class _MyHomePageState extends State<ProposalsPage> {
   bool isDialogShown = false;
-
+  ProposalsPage() {
+    Widget votingButton;
+    votingButton = Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 16),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+            primary: Colors.cyan,
+            padding: const EdgeInsets.all(16.0),
+            textStyle: const TextStyle(fontSize: 22, fontFamily: 'Poppins'),
+          ),
+          onPressed: () {Navigator.push(context, MaterialPageRoute(builder: (context) {
+            return VotingPage(title: 'Proposals',
+                authToken: widget.authToken,
+                localIp: widget.localIp,
+                accountAddress: widget.accountAddress,
+                provider: widget.provider,
+                buildingId: widget.buildingId,
+                tokenAddress: widget.tokenAddress,
+                rentAddress: widget.rentAddress);
+          }));},
+          //{/*628b802a01929414d3cfaab8*/ /*0xe922e9152c588e9fceddd239f6aaf19b2eec0d6f*/},
+          child: const Text('Create Proposal'),
+        ),
+      ),
+    );
+    if(widget.proposals[0].runtimeType.toString() == "Padding") {
+      widget.proposals.insert(0, votingButton);
+    }
+  }
+  //TODO: Make voting when clicked proposal
   void createProposal(String buildingId, String tokenAddress, String title, String description, int proposalType, int uint0, int uint1, int uint2, String address0) async {
     Response rsp = await post(
       Uri.parse('http://' + widget.localIp + ':3001/token/createProposal'),
@@ -234,141 +267,35 @@ class _MyHomePageState extends State<VotingPage> {
 
   @override
   Widget build(BuildContext context) {
+    ProposalsPage();
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
       ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.toll),
+            label: 'Trade',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.payments),
+            label: 'Rent',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.how_to_vote),
+            label: 'Governance',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+      ),
       body: Center(
-        child: ListView(
-          //crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: Text(
-                'Token Price:  Ξ',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: TextFormField(
-                controller: titleController,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'Title',
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: TextFormField(
-                controller: descriptionController,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'Description',
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: TextFormField(
-                controller: proposalTypeController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'Proposal Type',
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: TextFormField(
-                controller: uint0Controller,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'uint0',
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: TextFormField(
-                controller: uint1Controller,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'uint1',
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: TextFormField(
-                controller: uint2Controller,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'uint2',
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: TextFormField(
-                controller: address0Controller,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'address0',
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 16),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-                  primary: Colors.cyan,
-                  padding: const EdgeInsets.all(16.0),
-                  textStyle: const TextStyle(fontSize: 22, fontFamily: 'Poppins'),
-                ),
-                onPressed: () => createProposal(widget.buildingId, widget.tokenAddress, titleController.text, descriptionController.text, int.parse(proposalTypeController.text), int.parse(uint0Controller.text), int.parse(uint1Controller.text), int.parse(uint2Controller.text), address0Controller.text),
-                //{/*628b802a01929414d3cfaab8*/ /*0xe922e9152c588e9fceddd239f6aaf19b2eec0d6f*/},
-                child: const Text('Create Proposal'),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: TextFormField(
-                controller: proposalIdController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'Proposal Id',
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 16),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-                  primary: Colors.cyanAccent,
-                  padding: const EdgeInsets.all(16.0),
-                  textStyle: const TextStyle(fontSize: 22, fontFamily: 'Poppins'),
-                ),
-                onPressed: () => vote(widget.buildingId, widget.tokenAddress, int.parse(proposalIdController.text)),
-                //{/*628b802a01929414d3cfaab8*/ /*0xe922e9152c588e9fceddd239f6aaf19b2eec0d6f*/},
-                child: const Text('Vote'),
-              ),
-            ),
-
-
-          ],
-
-        ),
+        child: new ListView.builder(
+            itemCount: widget.proposals.length,
+            itemBuilder: (BuildContext ctxt, int index) {
+              return widget.proposals[index];
+            }),
       ),
     );
   }

@@ -21,7 +21,7 @@ import 'buildings.dart';
 
 
 class MenuPage extends StatefulWidget {
-  const MenuPage ({Key? key, required this.title, required this.provider, required this.authToken, required this.localIp, required this.accountAddress}) : super(key: key);
+  const MenuPage ({Key? key, required this.title, required this.provider, required this.authToken, required this.localIp, required this.accountAddress, required this.tokens}) : super(key: key);
 
 
   // This widget is the home page of your application. It is stateful, meaning
@@ -38,6 +38,7 @@ class MenuPage extends StatefulWidget {
   final String authToken;
   final String localIp;
   final String accountAddress;
+  final List<Widget> tokens;
 
 
 
@@ -52,34 +53,76 @@ class _MyHomePageState extends State<MenuPage> {
   final buildingNameController = TextEditingController();
   final buildingAddressController = TextEditingController();
   String buildingId2 = '62936fec385e672267bc77ee';
-  //TODO Change ip
 
-  //Send data to backend
-  Future<Response> sendData(String name, double tokenAmount) {
-    print(name + " " + tokenAmount.toString());
-    return post(
-      Uri.parse('http://' + widget.localIp + ':3001/building/deploy'), //REMEMBER TO CHANGE IP ADDRESS
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer ' + widget.authToken,
-      },
-      body: jsonEncode(<String, dynamic>{
-        'name': name,
-        'initial_amount': tokenAmount.toInt().toString(),
-        'symbol': "DST1",
-        'building_id': buildingId2,
-        'building_name': 'Train Station',
-        'building_address': 'Horsens',
-        'rentPrice': 1000000000000000000,
-        'depositPrice': 2000000000000000000,
-        'remainingMonths': 7,
-        'caretakerShare': 10,
-        'caretaker': '0x7176bd09199068e21be4137d1630fb8712633445',
-        'tenant': '0x7176bd09199068e21be4137d1630fb8712633445'
-      }), //TODO: Add fields for this data ^ and change hardcoded
+
+  MenuPage() {
+    Widget personalCard;
+    personalCard = Center(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Card(
+          shadowColor: Colors.deepPurple,
+          elevation: 8,
+          clipBehavior: Clip.antiAlias,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.orangeAccent, Colors.deepPurple],
+                begin: Alignment.bottomRight,
+                end: Alignment.topCenter,
+              ),
+            ),
+            padding: EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    'Username',
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    '15 ETH',
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    '0x7170ab98ce78ad115f105f70ab98ce78ad115f10',
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
-    //CHANGE TO JSON CALL
+    if (widget.tokens[0].runtimeType.toString() == "Padding") {
+      widget.tokens.insert(0, personalCard);
+    }
   }
+
+
 
   beforeBuildings(String tokenAddress) async {
     List<Widget> buildings = [];
@@ -164,7 +207,55 @@ class _MyHomePageState extends State<MenuPage> {
     }));
   }
 
+  beforeBuySell(String _tokenAddress, String _rentAddress, String _buildingId) async {
 
+    Response rsp = await post(
+      Uri.parse('http://' + widget.localIp + ':3001/building/getPriceForTokens'), //REMEMBER TO CHANGE IP ADDRESS
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer ' + widget.authToken,
+      },
+      body: jsonEncode(<String, dynamic>{
+        'building_id': buildingId2,
+        'tokenAmount': 1,
+        'tokenAddress': _tokenAddress,
+
+      }),
+    );
+
+    Map<String, dynamic> decodedRsp =json.decode(rsp.body);
+    String price = (double.parse(decodedRsp["price"])  / (pow(10,18)) ).toString();
+
+    Response rsp2 = await get(
+      Uri.parse('http://' + widget.localIp + ':3001/token/balanceOf?tokenAddress=' + _tokenAddress), //REMEMBER TO CHANGE IP ADDRESS
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer ' + widget.authToken,
+      },
+    );
+
+    Map<String, dynamic> decodedRsp2 =json.decode(rsp2.body);
+    String tokens = (decodedRsp2["balance"]).toString();
+
+    Response rsp3 = await get(
+      Uri.parse('http://' + widget.localIp + ':3001/token/balanceInEth'), //REMEMBER TO CHANGE IP ADDRESS
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer ' + widget.authToken,
+      },
+
+    );
+    print(rsp3.body);
+    Map<String, dynamic> decodedRsp3 =json.decode(rsp3.body);
+    String eth = (decodedRsp3["balance"]).toString();
+
+    Navigator.push(context, MaterialPageRoute(builder: (context) {
+
+      return BuySellPage(context: context,title: 'Buy / Sell', authToken: widget.authToken, localIp: widget.localIp,
+          accountAddress: widget.accountAddress, provider: widget.provider, currentPrice: price, currentTokenBalance: tokens, currentEthBalance: eth, buildingId: _buildingId, tokenAddress: _tokenAddress, rentAddress: _rentAddress);
+
+    }));
+  }
 
 
   @override
@@ -175,6 +266,7 @@ class _MyHomePageState extends State<MenuPage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
+    MenuPage();
     return Scaffold(
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
@@ -241,13 +333,11 @@ class _MyHomePageState extends State<MenuPage> {
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
-        child: ListView(
-          //crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-
-          ],
-
-        ),
+        child: new ListView.builder(
+            itemCount: widget.tokens.length,
+            itemBuilder: (BuildContext ctxt, int index) {
+              return widget.tokens[index];
+            })
       ),
 
 
@@ -255,53 +345,5 @@ class _MyHomePageState extends State<MenuPage> {
     );
   }
 
-  beforeBuySell(String _tokenAddress, String _rentAddress, String _buildingId) async {
 
-    Response rsp = await post(
-      Uri.parse('http://' + widget.localIp + ':3001/building/getPriceForTokens'), //REMEMBER TO CHANGE IP ADDRESS
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer ' + widget.authToken,
-      },
-      body: jsonEncode(<String, dynamic>{
-        'building_id': buildingId2,
-        'tokenAmount': 1,
-        'tokenAddress': _tokenAddress,
-
-      }),
-    );
-
-    Map<String, dynamic> decodedRsp =json.decode(rsp.body);
-    String price = (double.parse(decodedRsp["price"])  / (pow(10,18)) ).toString();
-
-    Response rsp2 = await get(
-      Uri.parse('http://' + widget.localIp + ':3001/token/balanceOf?tokenAddress=' + _tokenAddress), //REMEMBER TO CHANGE IP ADDRESS
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer ' + widget.authToken,
-      },
-    );
-
-    Map<String, dynamic> decodedRsp2 =json.decode(rsp2.body);
-    String tokens = (decodedRsp2["balance"]).toString();
-
-    Response rsp3 = await get(
-      Uri.parse('http://' + widget.localIp + ':3001/token/balanceInEth'), //REMEMBER TO CHANGE IP ADDRESS
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer ' + widget.authToken,
-      },
-
-    );
-    print(rsp3.body);
-    Map<String, dynamic> decodedRsp3 =json.decode(rsp3.body);
-    String eth = (decodedRsp3["balance"]).toString();
-
-    Navigator.push(context, MaterialPageRoute(builder: (context) {
-
-      return BuySellPage(context: context,title: 'Buy / Sell', authToken: widget.authToken, localIp: widget.localIp,
-          accountAddress: widget.accountAddress, provider: widget.provider, currentPrice: price, currentTokenBalance: tokens, currentEthBalance: eth, buildingId: _buildingId, tokenAddress: _tokenAddress, rentAddress: _rentAddress);
-
-    }));
-  }
 }

@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:dstate/proposals.dart';
 import 'package:dstate/rent.dart';
 import 'package:dstate/voting.dart';
 import 'package:flutter/cupertino.dart';
@@ -46,7 +47,7 @@ class BuySellPage extends StatefulWidget {
   @override
   State<BuySellPage> createState() => _MyHomePageState();
 }
-  //final int nonce = 31; //TODO get this from backend!!!!!!!!!!!!!!!!!
+
 class _MyHomePageState extends State<BuySellPage> {
   bool isDialogShown = false;
 
@@ -177,40 +178,82 @@ class _MyHomePageState extends State<BuySellPage> {
         to: "0x392F7bAccBfE1324df91298ae9Ffc153111CED7c",
         data: encodedData,
         nonce: nonce,
-        gas: 1500000); //TODO: test if stating gas is necessary
+        gas: 1500000);
     if(isDialogShown){Navigator.pop(context);}
     print("Canceled!");
     print(tx);
   }
 
   beforeVoting() async {
-    Response rsp = await post(
-      Uri.parse('http://' + widget.localIp + ':3001/building/getPriceForTokens'),
-      //REMEMBER TO CHANGE IP ADDRESS
+    List<Widget> proposals = [];
+    /*Response rsp = await get(
+      Uri.parse('http://' + widget.localIp + ':3001/token/checkForProposals'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer ' + widget.authToken,
       },
-      body: jsonEncode(<String, dynamic>{
-        'building_id': widget.buildingId,
-        'tokenAmount': 1,
-        'tokenAddress': widget.tokenAddress,
-
-      }),
     );
+    Map<String, dynamic> decodedRsp =json.decode(rsp.body);
+    print(decodedRsp);*/ //TODO: get proposals from backend
 
-    Map<String, dynamic> decodedRsp = json.decode(rsp.body);
-    String price = (double.parse(decodedRsp["price"]) / (pow(10, 18)))
-        .toString();
+
+
+
+    Widget proposal;
+    proposal = Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Card(
+        shadowColor: Colors.purple,
+        elevation: 8,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.redAccent, Colors.purple],
+              begin: Alignment.topRight,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+          padding: EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Proposal Title',
+                style: TextStyle(
+                  fontSize: 20,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Proposal description',
+                style: TextStyle(
+                  fontSize: 20,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    proposals.add(proposal);
+
     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
-      return VotingPage(title: 'Voting',
+      return ProposalsPage(title: 'Proposals',
           authToken: widget.authToken,
           localIp: widget.localIp,
           accountAddress: widget.accountAddress,
           provider: widget.provider,
           buildingId: widget.buildingId,
           tokenAddress: widget.tokenAddress,
-          rentAddress: widget.rentAddress);
+          rentAddress: widget.rentAddress,
+          proposals: proposals);
     }));
   }
 

@@ -91,7 +91,7 @@ class _MyHomePageState extends State<RegisterPage> {
   }
 
   //Connect to Wallet
-  //TODO: Make walletConnect work if metamask is already open ?
+
   _walletConnect2() async {
     //Wallet Connect Mobile
     if(Theme.of(context).platform == TargetPlatform.iOS || Theme.of(context).platform == TargetPlatform.android) {
@@ -129,8 +129,7 @@ class _MyHomePageState extends State<RegisterPage> {
 
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
 
-        return MenuPage(title: "Dstate", provider: widget.provider, authToken: authToken, localIp: widget.localIp, accountAddress: widget.accountAddress);
-
+        return beforeMenu();
       }));
 
 
@@ -158,10 +157,10 @@ class _MyHomePageState extends State<RegisterPage> {
       //String signature = await provider.sign(message: "0x5C783139457468657265756D205369676E6564204D6573736167653A5C6E3168", address: accountAddress);
 
       //print(signature);
-      //TODO: send signature to backend
+
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
 
-        return MenuPage(title: "Dstate", provider: widget.provider, authToken: authToken, localIp: widget.localIp, accountAddress: widget.accountAddress);
+        return beforeMenu();
 
       }));
 
@@ -188,7 +187,15 @@ class _MyHomePageState extends State<RegisterPage> {
   }
 
 
+  beforeMenu() {
+    List<Widget> tokens = [];
 
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+
+      return MenuPage(title: "Dstate", provider: widget.provider, authToken: authToken, localIp: widget.localIp, accountAddress: widget.accountAddress, tokens: tokens);
+
+    }));
+  }
 
   @override
   Widget build(BuildContext context) {
