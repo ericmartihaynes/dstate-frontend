@@ -18,6 +18,7 @@ import 'package:dart_web3/dart_web3.dart';
 import 'package:convert/convert.dart';
 
 import 'menu.dart';
+import 'metamask_widget.dart';
 
 
 void main() {
@@ -124,7 +125,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   //Via: 10.154.200.10
   //Kamtjatka: 10.20.11.1
-  String localIp = "10.20.11.1"; //TODO Change ip
+  String localIp = "10.154.200.28"; //TODO Change ip
 
 
 
@@ -307,6 +308,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   _showDialog(BuildContext context) {
     return showDialog(
+      barrierDismissible: false,
         context: context,
         builder: (context) {
           return AlertDialog(

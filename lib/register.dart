@@ -57,6 +57,7 @@ class _MyHomePageState extends State<RegisterPage> {
   final buildingNameController = TextEditingController();
   final buildingAddressController = TextEditingController();
   String authToken = "";
+  bool isDialogShown = false;
 
 
   Future<Response> sendPost(String publicAddress, String email, String username) {
@@ -104,8 +105,11 @@ class _MyHomePageState extends State<RegisterPage> {
 
       String nonce = user["nonce"].toString();
       String msg = "I am signing my one-time nonce: " + nonce;//I am signing my one-time nonce: ${user.nonce}
+      isDialogShown = true;
+      _showDialog(context);
       //Shout-out to HaoCherHong for finding a fix for this and adding personalSign to the walletconnect_dart library :)
       String signature = await widget.provider.personalSign(message: msg, address: widget.accountAddress, password: "test password");
+      if(isDialogShown){Navigator.pop(context);}
 
       print(signature);
       print(widget.accountAddress);
@@ -164,7 +168,24 @@ class _MyHomePageState extends State<RegisterPage> {
     }
   }
 
-
+  _showDialog(BuildContext context) {
+    return showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(32.0))),
+            backgroundColor: Colors.white,
+            title: const Text('Confirm Operation in Wallet',
+              style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+            ),
+            actions: <Widget>[
+              Center(child: Image.asset('assets/metamask.gif')),
+            ],
+          );
+        }
+    ).whenComplete(() => isDialogShown = false);
+  }
 
 
 

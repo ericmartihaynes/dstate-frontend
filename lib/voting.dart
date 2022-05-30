@@ -44,6 +44,8 @@ class VotingPage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<VotingPage> {
+  bool isDialogShown = false;
+
   void createProposal(String buildingId, String tokenAddress, String title, String description, int proposalType, int uint0, int uint1, int uint2, String address0) async {
     Response rsp = await post(
       Uri.parse('http://' + widget.localIp + ':3001/token/createProposal'), //TODO: add route
@@ -72,12 +74,14 @@ class _MyHomePageState extends State<VotingPage> {
     List<int> value = hex.decode(data2);
     Uint8List encodedData = Uint8List.fromList(value);
     var tx;
+    isDialogShown = true;
+    _showDialog(context);
     tx = await widget.provider.sendTransaction(from: widget.accountAddress,
         to: tokenAddress,
         data: encodedData,
         nonce: nonce,
         gas: 1500000);
-
+    if(isDialogShown){Navigator.pop(context);}
     print("Proposed!");
     print(tx);
   }
@@ -104,12 +108,14 @@ class _MyHomePageState extends State<VotingPage> {
     List<int> value = hex.decode(data2);
     Uint8List encodedData = Uint8List.fromList(value);
     var tx;
+    isDialogShown = true;
+    _showDialog(context);
     tx = await widget.provider.sendTransaction(from: widget.accountAddress,
         to: tokenAddress,
         data: encodedData,
         nonce: nonce,
         gas: 1500000);
-
+    if(isDialogShown){Navigator.pop(context);}
     print("Voted!");
     print(tx);
   }
@@ -205,6 +211,25 @@ class _MyHomePageState extends State<VotingPage> {
     else if (index == 1) {
       await beforeRent();
     }
+  }
+
+  _showDialog(BuildContext context) {
+    return showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(32.0))),
+            backgroundColor: Colors.white,
+            title: const Text('Confirm Operation in Wallet',
+              style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+            ),
+            actions: <Widget>[
+              Center(child: Image.asset('assets/metamask.gif')),
+            ],
+          );
+        }
+    ).whenComplete(() => isDialogShown = false);
   }
 
   @override

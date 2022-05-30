@@ -48,6 +48,7 @@ class BuySellPage extends StatefulWidget {
 }
   //final int nonce = 31; //TODO get this from backend!!!!!!!!!!!!!!!!!
 class _MyHomePageState extends State<BuySellPage> {
+  bool isDialogShown = false;
 
   void sellToken(double ethAmount, double tokenAmount, String buildingId, String tokenAddress) async {
     Response rsp = await post(
@@ -72,18 +73,24 @@ class _MyHomePageState extends State<BuySellPage> {
     List<int> value = hex.decode(data2);
     Uint8List encodedData = Uint8List.fromList(value);
     var tx;
-    if(/*approved already*/true) {
+    if(/*approved already*/true) { //TODO: Approve!
+      isDialogShown = true;
+      _showDialog(context);
       tx = await widget.provider.sendTransaction(from: widget.accountAddress,
           to: "0x392F7bAccBfE1324df91298ae9Ffc153111CED7c",
           data: encodedData,
           nonce: nonce,
-          gas: 1500000); //TODO: test if stating gas is necessary
+          gas: 1500000);
+      if(isDialogShown){Navigator.pop(context);}
     }
     else{
+      isDialogShown = true;
+      _showDialog(context);
       tx = await widget.provider.sendTransaction(from: widget.accountAddress,
           to: "0xe922E9152c588e9FCedDD239f6AAF19B2eEC0d6f",
           data: encodedData,
           gas: 1500000);
+      if(isDialogShown){Navigator.pop(context);}
     }
     print("Sold!");
     print(tx);
@@ -128,12 +135,15 @@ class _MyHomePageState extends State<BuySellPage> {
     List<int> value = hex.decode(data2);
     Uint8List encodedData = Uint8List.fromList(value);
     var tx;
+    isDialogShown = true;
+    _showDialog(context);
     tx = await widget.provider.sendTransaction(from: widget.accountAddress,
         to: "0x392F7bAccBfE1324df91298ae9Ffc153111CED7c",
         data: encodedData,
         value: BigInt.parse(price),
         nonce: nonce,
-        gas: 1500000); //TODO: test if stating gas is necessary
+        gas: 1500000);
+    if(isDialogShown){Navigator.pop(context);}
 
     print("Bought!");
     print(tx);
@@ -161,13 +171,14 @@ class _MyHomePageState extends State<BuySellPage> {
     List<int> value = hex.decode(data2);
     Uint8List encodedData = Uint8List.fromList(value);
     var tx;
-
+    isDialogShown = true;
+    _showDialog(context);
     tx = await widget.provider.sendTransaction(from: widget.accountAddress,
         to: "0x392F7bAccBfE1324df91298ae9Ffc153111CED7c",
         data: encodedData,
         nonce: nonce,
         gas: 1500000); //TODO: test if stating gas is necessary
-
+    if(isDialogShown){Navigator.pop(context);}
     print("Canceled!");
     print(tx);
   }
@@ -244,6 +255,25 @@ class _MyHomePageState extends State<BuySellPage> {
     else if (index == 2) {
       await beforeVoting();
     }
+  }
+
+  _showDialog(BuildContext context) {
+    return showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(32.0))),
+            backgroundColor: Colors.white,
+            title: const Text('Confirm Operation in Wallet',
+              style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+            ),
+            actions: <Widget>[
+              Center(child: Image.asset('assets/metamask.gif')),
+            ],
+          );
+        }
+    ).whenComplete(() => isDialogShown = false);
   }
 
   @override

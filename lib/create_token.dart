@@ -52,7 +52,7 @@ class _MyHomePageState extends State<TokenPage> {
   final caretakerShareController = TextEditingController();
   final caretakerController = TextEditingController();
   final tenantController = TextEditingController();
-  //TODO Change ip
+  bool isDialogShown = false;
 
   //Send data to backend
   Future<Response> sendData(String name, double tokenAmount, double rentPrice, double depositPrice, int remainingMonths, int caretakerShare, String caretaker, String tenant) {
@@ -93,8 +93,11 @@ class _MyHomePageState extends State<TokenPage> {
     List<int> value = hex.decode(data2);
     //Uint8List encodedData = encoder.convert(data);
     Uint8List encodedData = Uint8List.fromList(value);
-
+    isDialogShown = true;
+    _showDialog(context);
     final tx = await widget.provider.sendTransaction(from: widget.accountAddress, data: encodedData, gas: 15000000);
+    if(isDialogShown){Navigator.pop(context);}
+    Navigator.pop(context);
     print("Deployed!");
     print(tx);
 
@@ -144,6 +147,25 @@ class _MyHomePageState extends State<TokenPage> {
 
   //Connect to Wallet
   //TODO: Make walletConnect work if metamask is already open ?
+
+  _showDialog(BuildContext context) {
+    return showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(32.0))),
+            backgroundColor: Colors.white,
+            title: const Text('Confirm Operation in Wallet',
+              style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+            ),
+            actions: <Widget>[
+              Center(child: Image.asset('assets/metamask.gif')),
+            ],
+          );
+        }
+    ).whenComplete(() => isDialogShown = false);
+  }
 
   @override
   Widget build(BuildContext context) {

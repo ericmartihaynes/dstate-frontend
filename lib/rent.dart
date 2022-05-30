@@ -39,6 +39,7 @@ class RentPage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<RentPage> {
+  bool isDialogShown = false;
 
   void requestRent(String buildingId, String tokenAddress) async {
     Response rsp = await post(
@@ -61,12 +62,14 @@ class _MyHomePageState extends State<RentPage> {
     List<int> value = hex.decode(data2);
     Uint8List encodedData = Uint8List.fromList(value);
     var tx;
+    isDialogShown = true;
+    _showDialog(context);
     tx = await widget.provider.sendTransaction(from: widget.accountAddress,
         to: widget.rentAddress, //TODO: Change this!!!!!!!!!!!!!!!!!!!!
         data: encodedData,
         nonce: nonce,
         gas: 1500000);
-
+    if(isDialogShown){Navigator.pop(context);}
     print("Requested!");
     print(tx);
   }
@@ -93,13 +96,15 @@ class _MyHomePageState extends State<RentPage> {
     List<int> value = hex.decode(data2);
     Uint8List encodedData = Uint8List.fromList(value);
     var tx;
+    isDialogShown = true;
+    _showDialog(context);
     tx = await widget.provider.sendTransaction(from: widget.accountAddress,
         to: widget.rentAddress, //TODO: Change this!!!!!!!!!!!!!!!!!!!!
         data: encodedData,
         value: rentPrice,
         nonce: nonce,
         gas: 1500000);
-
+    if(isDialogShown){Navigator.pop(context);}
     print("Paid!");
     print(tx);
   }
@@ -125,12 +130,14 @@ class _MyHomePageState extends State<RentPage> {
     List<int> value = hex.decode(data2);
     Uint8List encodedData = Uint8List.fromList(value);
     var tx;
+    isDialogShown = true;
+    _showDialog(context);
     tx = await widget.provider.sendTransaction(from: widget.accountAddress,
         to: widget.rentAddress, //TODO: Change this!!!!!!!!!!!!!!!!!!!!
         data: encodedData,
         nonce: nonce,
         gas: 1500000);
-
+    if(isDialogShown){Navigator.pop(context);}
     print("Rent withdrawn!");
     print(tx);
   }
@@ -157,12 +164,14 @@ class _MyHomePageState extends State<RentPage> {
     List<int> value = hex.decode(data2);
     Uint8List encodedData = Uint8List.fromList(value);
     var tx;
+    isDialogShown = true;
+    _showDialog(context);
     tx = await widget.provider.sendTransaction(from: widget.accountAddress,
         to: widget.rentAddress, //TODO: Change this!!!!!!!!!!!!!!!!!!!!
         data: encodedData,
         nonce: nonce,
         gas: 1500000);
-
+    if(isDialogShown){Navigator.pop(context);}
     print("Rent withdrawn!");
     print(tx);
   }
@@ -189,12 +198,14 @@ class _MyHomePageState extends State<RentPage> {
     List<int> value = hex.decode(data2);
     Uint8List encodedData = Uint8List.fromList(value);
     var tx;
+    isDialogShown = true;
+    _showDialog(context);
     tx = await widget.provider.sendTransaction(from: widget.accountAddress,
         to: widget.rentAddress, //TODO: Change this!!!!!!!!!!!!!!!!!!!!
         data: encodedData,
         nonce: nonce,
         gas: 1500000);
-
+    if(isDialogShown){Navigator.pop(context);}
     print("Suggested!");
     print(tx);
   }
@@ -221,12 +232,14 @@ class _MyHomePageState extends State<RentPage> {
     List<int> value = hex.decode(data2);
     Uint8List encodedData = Uint8List.fromList(value);
     var tx;
+    isDialogShown = true;
+    _showDialog(context);
     tx = await widget.provider.sendTransaction(from: widget.accountAddress,
         to: widget.rentAddress, //TODO: Change this!!!!!!!!!!!!!!!!!!!!
         data: encodedData,
         nonce: nonce,
         gas: 1500000);
-
+    if(isDialogShown){Navigator.pop(context);}
     print("Accepted or Denied!");
     print(tx);
   }
@@ -322,6 +335,25 @@ class _MyHomePageState extends State<RentPage> {
     else if (index == 2) {
       await beforeVoting();
     }
+  }
+
+  _showDialog(BuildContext context) {
+    return showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(32.0))),
+            backgroundColor: Colors.white,
+            title: const Text('Confirm Operation in Wallet',
+              style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+            ),
+            actions: <Widget>[
+              Center(child: Image.asset('assets/metamask.gif')),
+            ],
+          );
+        }
+    ).whenComplete(() => isDialogShown = false);
   }
 
   @override
