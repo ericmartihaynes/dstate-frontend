@@ -7,6 +7,7 @@ import 'package:dstate/tokenize_building.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'dart:convert';
+import 'dart:developer' as dev;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:crypto/crypto.dart';
 //web3
@@ -15,6 +16,8 @@ import 'package:dstate/transaction_sender.dart';
 import 'package:walletconnect_dart/walletconnect_dart.dart';
 import 'package:dart_web3/dart_web3.dart';
 import 'package:convert/convert.dart';
+
+import 'buildings.dart';
 
 
 class MenuPage extends StatefulWidget {
@@ -78,52 +81,85 @@ class _MyHomePageState extends State<MenuPage> {
     //CHANGE TO JSON CALL
   }
 
-  beforeBuySell(String tokenAddress) async {
-
-    Response rsp = await post(
-      Uri.parse('http://' + widget.localIp + ':3001/building/getPriceForTokens'), //REMEMBER TO CHANGE IP ADDRESS
+  beforeBuildings(String tokenAddress) async {
+    List<Widget> buildings = [];
+    Response rsp = await get(
+      Uri.parse('http://' + widget.localIp + ':3001/building/approved'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer ' + widget.authToken,
       },
-      body: jsonEncode(<String, dynamic>{
-        'building_id': buildingId2,
-        'tokenAmount': 1,
-        'tokenAddress': tokenAddress,
-
-      }),
     );
-
     Map<String, dynamic> decodedRsp =json.decode(rsp.body);
-    String price = (double.parse(decodedRsp["price"])  / (pow(10,18)) ).toString();
+    var list = decodedRsp["buildings"];
+    Widget buildingCard;
+    String name;
+    String address;
+    String token = "";
+    String rent = "";
 
-    Response rsp2 = await get(
-      Uri.parse('http://' + widget.localIp + ':3001/token/balanceOf?tokenAddress=' + tokenAddress), //REMEMBER TO CHANGE IP ADDRESS
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer ' + widget.authToken,
-      },
-    );
+    for(dynamic building in list) {
+      print(building);
+      name = building["name"];
+      address = building["address"];
+      try{ token = building["token_id"];} catch(e){} //TODO: change to token address
+      try{ rent = building["rentContractAddress"];} catch(e){}
+      buildingCard = Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Card(
+          clipBehavior: Clip.antiAlias,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(26),
+          ),
+          child: Column(
+            children: [
+              Stack(
+                children: [
+                  Ink.image(
+                    image: NetworkImage(
+                      'http://placeimg.com/640/480/arch',
+                    ),
+                    child: InkWell(
+                      onTap: () => beforeBuySell('0x06c6005575b12e691046DCD52CBD0e3e1A8FF9a4', '0x7aA7b5e70D361c3e1Fc9E24a841f1440276d0d74', '62936fec385e672267bc77ee'),
+                    ),
+                    height: 240,
+                    fit: BoxFit.cover,
+                  ),
+                  Positioned(
+                    bottom: 16,
+                    right: 16,
+                    left: 16,
+                    child: Text(
+                      name,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        backgroundColor: Colors.grey.withOpacity(0.25),
+                        fontSize: 24,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Padding(
+                padding: EdgeInsets.all(16).copyWith(bottom: 0),
+                child: Text(
+                  address + ' ' + token + '' + rent,
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+              ButtonBar()
+            ],
+          ),
+        ),
+      );
+      buildings.add(buildingCard);
+      //dev.log(decodedRsp.toString());
 
-    Map<String, dynamic> decodedRsp2 =json.decode(rsp2.body);
-    String tokens = (decodedRsp2["balance"]).toString();
-
-    Response rsp3 = await get(
-      Uri.parse('http://' + widget.localIp + ':3001/token/balanceInEth'), //REMEMBER TO CHANGE IP ADDRESS
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer ' + widget.authToken,
-      },
-
-    );
-    print(rsp3.body);
-    Map<String, dynamic> decodedRsp3 =json.decode(rsp3.body);
-    String eth = (decodedRsp3["balance"]).toString();
-
+    }
     Navigator.push(context, MaterialPageRoute(builder: (context) {
 
-      return BuySellPage(context: context,title: 'Buy / Sell', authToken: widget.authToken, localIp: widget.localIp,
-          accountAddress: widget.accountAddress, provider: widget.provider, currentPrice: price, currentTokenBalance: tokens, currentEthBalance: eth, buildingId: buildingId2, tokenAddress: tokenAddress, rentAddress: '0x7aA7b5e70D361c3e1Fc9E24a841f1440276d0d74');
+      return BuildingsPage(title: "Dstate", provider: widget.provider, authToken: widget.authToken, localIp: widget.localIp, accountAddress: widget.accountAddress,buildings: buildings);
 
     }));
   }
@@ -180,7 +216,7 @@ class _MyHomePageState extends State<MenuPage> {
               ListTile(
                 leading: Icon(Icons.location_city),
                 title: const Text('Buildings'),
-                onTap: () async { beforeBuySell('0x06c6005575b12e691046DCD52CBD0e3e1A8FF9a4'); },
+                onTap: () async { beforeBuildings('0x06c6005575b12e691046DCD52CBD0e3e1A8FF9a4'); },
               ),
               ListTile(
                 leading: Icon(Icons.domain_add),
@@ -217,5 +253,55 @@ class _MyHomePageState extends State<MenuPage> {
 
       // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  beforeBuySell(String _tokenAddress, String _rentAddress, String _buildingId) async {
+
+    Response rsp = await post(
+      Uri.parse('http://' + widget.localIp + ':3001/building/getPriceForTokens'), //REMEMBER TO CHANGE IP ADDRESS
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer ' + widget.authToken,
+      },
+      body: jsonEncode(<String, dynamic>{
+        'building_id': buildingId2,
+        'tokenAmount': 1,
+        'tokenAddress': _tokenAddress,
+
+      }),
+    );
+
+    Map<String, dynamic> decodedRsp =json.decode(rsp.body);
+    String price = (double.parse(decodedRsp["price"])  / (pow(10,18)) ).toString();
+
+    Response rsp2 = await get(
+      Uri.parse('http://' + widget.localIp + ':3001/token/balanceOf?tokenAddress=' + _tokenAddress), //REMEMBER TO CHANGE IP ADDRESS
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer ' + widget.authToken,
+      },
+    );
+
+    Map<String, dynamic> decodedRsp2 =json.decode(rsp2.body);
+    String tokens = (decodedRsp2["balance"]).toString();
+
+    Response rsp3 = await get(
+      Uri.parse('http://' + widget.localIp + ':3001/token/balanceInEth'), //REMEMBER TO CHANGE IP ADDRESS
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer ' + widget.authToken,
+      },
+
+    );
+    print(rsp3.body);
+    Map<String, dynamic> decodedRsp3 =json.decode(rsp3.body);
+    String eth = (decodedRsp3["balance"]).toString();
+
+    Navigator.push(context, MaterialPageRoute(builder: (context) {
+
+      return BuySellPage(context: context,title: 'Buy / Sell', authToken: widget.authToken, localIp: widget.localIp,
+          accountAddress: widget.accountAddress, provider: widget.provider, currentPrice: price, currentTokenBalance: tokens, currentEthBalance: eth, buildingId: _buildingId, tokenAddress: _tokenAddress, rentAddress: _rentAddress);
+
+    }));
   }
 }

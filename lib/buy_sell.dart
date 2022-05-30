@@ -361,6 +361,7 @@ class _MyHomePageState extends State<BuySellPage> {
               padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 16),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                   primary: Colors.redAccent,
                   padding: const EdgeInsets.all(16.0),
                   textStyle: const TextStyle(fontSize: 22, fontFamily: 'Poppins'),
@@ -394,6 +395,7 @@ class _MyHomePageState extends State<BuySellPage> {
               padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 16),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                   primary: Colors.greenAccent,
                   padding: const EdgeInsets.all(16.0),
                   textStyle: const TextStyle(fontSize: 22, fontFamily: 'Poppins'),
@@ -425,6 +427,7 @@ class _MyHomePageState extends State<BuySellPage> {
               padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 16),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                   primary: Colors.deepOrange,
                   padding: const EdgeInsets.all(16.0),
                   textStyle: const TextStyle(fontSize: 22, fontFamily: 'Poppins'),

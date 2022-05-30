@@ -347,6 +347,7 @@ class _MyHomePageState extends State<VotingPage> {
               padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 16),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                   primary: Colors.cyan,
                   padding: const EdgeInsets.all(16.0),
                   textStyle: const TextStyle(fontSize: 22, fontFamily: 'Poppins'),
@@ -371,6 +372,7 @@ class _MyHomePageState extends State<VotingPage> {
               padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 16),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                   primary: Colors.cyanAccent,
                   padding: const EdgeInsets.all(16.0),
                   textStyle: const TextStyle(fontSize: 22, fontFamily: 'Poppins'),

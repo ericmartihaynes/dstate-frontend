@@ -234,6 +234,7 @@ class _MyHomePageState extends State<RegisterPage> {
               padding: const EdgeInsets.symmetric(horizontal: 125, vertical: 16),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                   primary: Colors.amber,
                   padding: const EdgeInsets.all(16.0),
                   textStyle: const TextStyle(fontSize: 22, fontFamily: 'Poppins'),

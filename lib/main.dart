@@ -125,7 +125,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   //Via: 10.154.200.10
   //Kamtjatka: 10.20.11.1
-  String localIp = "10.154.200.28"; //TODO Change ip
+  String localIp = "10.20.11.1"; //TODO Change ip
 
 
 
@@ -353,6 +353,7 @@ class _MyHomePageState extends State<MyHomePage> {
               padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 16),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                   primary: uiMetamaskConnected ? Colors.black12 : Colors.deepOrange,
                   padding: const EdgeInsets.all(16.0),
                   textStyle: const TextStyle(fontSize: 22, fontFamily: 'Poppins'),
@@ -365,6 +366,7 @@ class _MyHomePageState extends State<MyHomePage> {
               padding: const EdgeInsets.symmetric(horizontal: 125, vertical: 16),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                   primary: uiMetamaskConnected ? Colors.deepPurple : Colors.black12,
                   padding: const EdgeInsets.all(16.0),
                   textStyle: const TextStyle(fontSize: 22, fontFamily: 'Poppins'),

@@ -397,6 +397,7 @@ class _MyHomePageState extends State<RentPage> {
               padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 16),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                   primary: Colors.purpleAccent,
                   padding: const EdgeInsets.all(16.0),
                   textStyle: const TextStyle(fontSize: 22, fontFamily: 'Poppins'),
@@ -410,6 +411,7 @@ class _MyHomePageState extends State<RentPage> {
               padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 16),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                   primary: Colors.deepOrange,
                   padding: const EdgeInsets.all(16.0),
                   textStyle: const TextStyle(fontSize: 22, fontFamily: 'Poppins'),
@@ -423,6 +425,7 @@ class _MyHomePageState extends State<RentPage> {
               padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 16),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                   primary: Colors.lightGreenAccent,
                   padding: const EdgeInsets.all(16.0),
                   textStyle: const TextStyle(fontSize: 22, fontFamily: 'Poppins'),
@@ -447,6 +450,7 @@ class _MyHomePageState extends State<RentPage> {
               padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 16),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                   primary: Colors.lightGreen,
                   padding: const EdgeInsets.all(16.0),
                   textStyle: const TextStyle(fontSize: 22, fontFamily: 'Poppins'),
@@ -471,6 +475,7 @@ class _MyHomePageState extends State<RentPage> {
               padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 16),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                   primary: Colors.pinkAccent,
                   padding: const EdgeInsets.all(16.0),
                   textStyle: const TextStyle(fontSize: 22, fontFamily: 'Poppins'),
@@ -494,6 +499,7 @@ class _MyHomePageState extends State<RentPage> {
               padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 16),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                   primary: Colors.pink,
                   padding: const EdgeInsets.all(16.0),
                   textStyle: const TextStyle(fontSize: 22, fontFamily: 'Poppins'),
