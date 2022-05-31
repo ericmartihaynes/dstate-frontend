@@ -187,7 +187,7 @@ class _MyHomePageState extends State<RegisterPage> {
   }
 
 
-  beforeMenu() {
+  beforeMenu() { //TODO: paste from main
     List<Widget> tokens = [];
 
     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {

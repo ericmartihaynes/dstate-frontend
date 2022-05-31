@@ -10,6 +10,7 @@ import 'package:dstate/buy_sell.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'dart:convert';
+import 'dart:developer' as dev;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:crypto/crypto.dart';
 //web3
@@ -50,6 +51,7 @@ class BuySellPage extends StatefulWidget {
 
 class _MyHomePageState extends State<BuySellPage> {
   bool isDialogShown = false;
+  String buySellAddress = "";
 
   void sellToken(double ethAmount, double tokenAmount, String buildingId, String tokenAddress) async {
     Response rsp = await post(
@@ -69,32 +71,36 @@ class _MyHomePageState extends State<BuySellPage> {
     Map<String, dynamic> decodedRsp =json.decode(rsp.body);
     String data2 = decodedRsp["abi"];
     int nonce = int.parse(decodedRsp["nonce"].toString());
+    String needToApprove = decodedRsp["approve"];
     data2 = data2.substring(2);
     const Utf8Encoder encoder = Utf8Encoder();
     List<int> value = hex.decode(data2);
     Uint8List encodedData = Uint8List.fromList(value);
     var tx;
-    if(/*approved already*/true) { //TODO: Approve!
+    if(needToApprove == "false") {
       isDialogShown = true;
       _showDialog(context);
       tx = await widget.provider.sendTransaction(from: widget.accountAddress,
-          to: "0x392F7bAccBfE1324df91298ae9Ffc153111CED7c",
+          to: "0x392F7bAccBfE1324df91298ae9Ffc153111CED7c", //TODO: Change to buysell
           data: encodedData,
           nonce: nonce,
           gas: 1500000);
       if(isDialogShown){Navigator.pop(context);}
+      print("Sold!");
+      print(tx);
     }
     else{
       isDialogShown = true;
       _showDialog(context);
       tx = await widget.provider.sendTransaction(from: widget.accountAddress,
-          to: "0xe922E9152c588e9FCedDD239f6AAF19B2eEC0d6f",
+          to: widget.tokenAddress,
           data: encodedData,
           gas: 1500000);
       if(isDialogShown){Navigator.pop(context);}
+      print("Approved!");
+      print(tx);
     }
-    print("Sold!");
-    print(tx);
+
   }
 
   void buyToken(double tokenAmount, String buildingId, String tokenAddress) async {
@@ -149,7 +155,7 @@ class _MyHomePageState extends State<BuySellPage> {
     print("Bought!");
     print(tx);
   }
-
+//TODO: change buysell address
   void cancelToken(double tokenAmount, String buildingId, String tokenAddress) async {
     Response rsp = await post(
       Uri.parse('http://' + widget.localIp + ':3001/building/cancelSale'), //REMEMBER TO CHANGE IP ADDRESS
@@ -186,63 +192,88 @@ class _MyHomePageState extends State<BuySellPage> {
 
   beforeVoting() async {
     List<Widget> proposals = [];
-    /*Response rsp = await get(
+    Response rsp = await post(
       Uri.parse('http://' + widget.localIp + ':3001/token/checkForProposals'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer ' + widget.authToken,
       },
+      body: jsonEncode(<String, dynamic>{
+        'proposalNumber': 10,
+        'previousId': 0,
+        'tokenAddress': widget.tokenAddress,
+
+      }),//TODO: lazy loading
     );
     Map<String, dynamic> decodedRsp =json.decode(rsp.body);
-    print(decodedRsp);*/ //TODO: get proposals from backend
-
-
-
+    //dev.log(decodedRsp.toString());
 
     Widget proposal;
-    proposal = Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Card(
-        shadowColor: Colors.purple,
-        elevation: 8,
-        clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.redAccent, Colors.purple],
-              begin: Alignment.topRight,
-              end: Alignment.bottomCenter,
+    var list = decodedRsp["proposals"];
+    String title;
+    String description;
+    int proposalType;
+    int id;
+    int uint0;
+    int uint1;
+    int uint2;
+    String address0;
+    for(dynamic prop in list) {
+      title = prop["title"];
+      description = prop["description"];
+      proposalType = int.parse(prop["proposalType"]);
+      id = int.parse(prop["id"]);
+      uint0 = int.parse(prop["uint0"]);
+      uint1 = int.parse(prop["uint1"]);
+      uint2 = int.parse(prop["uint2"]);
+      address0 = prop["address0"];
+
+      proposal = Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Card(
+          shadowColor: Colors.purple,
+          elevation: 8,
+          clipBehavior: Clip.antiAlias,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.redAccent, Colors.purple],
+                begin: Alignment.topRight,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+            padding: EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  description,
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
             ),
           ),
-          padding: EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Proposal Title',
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Proposal description',
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.white,
-                ),
-              ),
-            ],
-          ),
         ),
-      ),
-    );
-    proposals.add(proposal);
+      );
+      proposals.add(proposal);
+
+    }
+
 
     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
       return ProposalsPage(title: 'Proposals',

@@ -126,7 +126,7 @@ class _MyHomePageState extends State<MenuPage> {
 
   beforeBuildings(String tokenAddress) async {
     List<Widget> buildings = [];
-    Response rsp = await get(
+    Response rsp = await post(
       Uri.parse('http://' + widget.localIp + ':3001/building/approved'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
@@ -145,7 +145,7 @@ class _MyHomePageState extends State<MenuPage> {
       print(building);
       name = building["name"];
       address = building["address"];
-      try{ token = building["token_id"];} catch(e){} //TODO: change to token address
+      try{ token = building["token_id"];} catch(e){} //TODO: finish
       try{ rent = building["rentContractAddress"];} catch(e){}
       buildingCard = Padding(
         padding: const EdgeInsets.all(8.0),
@@ -197,7 +197,7 @@ class _MyHomePageState extends State<MenuPage> {
         ),
       );
       buildings.add(buildingCard);
-      //dev.log(decodedRsp.toString());
+      dev.log(decodedRsp.toString());
 
     }
     Navigator.push(context, MaterialPageRoute(builder: (context) {

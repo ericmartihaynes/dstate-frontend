@@ -143,9 +143,9 @@ class _MyHomePageState extends State<RentPage> {
     print(tx);
   }
 
-  void withdrawPreviousRent(String buildingId, String tokenAddress, int previousRentNumber) async { //TODO: Needs route
+  void withdrawPreviousRent(String buildingId, String tokenAddress, int previousRentNumber) async {
     Response rsp = await post(
-      Uri.parse('http://' + widget.localIp + ':3001/building/requestRent'), //REMEMBER TO CHANGE IP ADDRESS
+      Uri.parse('http://' + widget.localIp + ':3001/building/withdrawPreviousRent'), //REMEMBER TO CHANGE IP ADDRESS
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer ' + widget.authToken,
@@ -247,63 +247,87 @@ class _MyHomePageState extends State<RentPage> {
 
   beforeVoting() async {
     List<Widget> proposals = [];
-    /*Response rsp = await get(
+    Response rsp = await post(
       Uri.parse('http://' + widget.localIp + ':3001/token/checkForProposals'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer ' + widget.authToken,
       },
+      body: jsonEncode(<String, dynamic>{
+        'proposalNumber': 10,
+        'previousId': 0,
+        'tokenAddress': widget.tokenAddress,
+
+      }),//TODO: lazy loading
     );
     Map<String, dynamic> decodedRsp =json.decode(rsp.body);
-    print(decodedRsp);*/ //TODO: get proposals from backend
-
-
-
 
     Widget proposal;
-    proposal = Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Card(
-        shadowColor: Colors.purple,
-        elevation: 8,
-        clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.redAccent, Colors.purple],
-              begin: Alignment.topRight,
-              end: Alignment.bottomCenter,
+    var list = decodedRsp["proposals"];
+    String title;
+    String description;
+    int proposalType;
+    int id;
+    int uint0;
+    int uint1;
+    int uint2;
+    String address0;
+    for(dynamic prop in list) {
+      title = prop["title"];
+      description = prop["description"];
+      proposalType = int.parse(prop["proposalType"]);
+      id = int.parse(prop["id"]);
+      uint0 = int.parse(prop["uint0"]);
+      uint1 = int.parse(prop["uint1"]);
+      uint2 = int.parse(prop["uint2"]);
+      address0 = prop["address0"];
+
+      proposal = Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Card(
+          shadowColor: Colors.purple,
+          elevation: 8,
+          clipBehavior: Clip.antiAlias,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.redAccent, Colors.purple],
+                begin: Alignment.topRight,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+            padding: EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  description,
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
             ),
           ),
-          padding: EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Proposal Title',
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Proposal description',
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.white,
-                ),
-              ),
-            ],
-          ),
         ),
-      ),
-    );
-    proposals.add(proposal);
+      );
+      proposals.add(proposal);
+
+    }
+
 
     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
       return ProposalsPage(title: 'Proposals',

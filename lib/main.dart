@@ -8,6 +8,7 @@ import 'package:dstate/tokenize_building.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'dart:convert';
+import 'dart:developer' as dev;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:crypto/crypto.dart';
 //web3
@@ -95,6 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String accountAddress = "";
   String authToken = "";
   String buildingId = "";
+  String userId = "";
   bool isDialogShown = false;
   final connector = WalletConnect(
     bridge: 'https://bridge.walletconnect.org',
@@ -122,7 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   //Via: 10.154.200.10
   //Kamtjatka: 10.20.11.1
-  String localIp = "10.20.11.1"; //TODO Change ip
+  String localIp = "10.154.200.94"; //TODO Change ip
 
 
   Future<Response> fetchUsers(String publicAddress) {
@@ -237,6 +239,7 @@ class _MyHomePageState extends State<MyHomePage> {
       Map<String, dynamic> jwtDecoded =json.decode(jwtResponse.body);
 
       authToken = jwtDecoded["accessToken"];
+      userId = jwtDecoded["user_id"];
       print(authToken);
       setState(() {
         uiMetamaskConnected = true;
@@ -318,59 +321,82 @@ class _MyHomePageState extends State<MyHomePage> {
   beforeMenu() async {
     List<Widget> tokens = [];
     Response rsp = await get(
-      Uri.parse('http://' + localIp + ':3001/users/profile?publicAddress=' + accountAddress),
+      Uri.parse('http://' + localIp + ':3001/users/profile/' + userId),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer ' + authToken,
       },
-    ); //TODO: fix error
+    ); //TODO: finish
     Map<String, dynamic> decodedRsp =json.decode(rsp.body);
-    print(decodedRsp);
-    Widget token = Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Card(
-        shadowColor: Colors.deepOrange,
-        elevation: 8,
-        clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.purpleAccent, Colors.deepOrange],
-              begin: Alignment.topRight,
-              end: Alignment.bottomCenter,
+
+    var user = decodedRsp["user"];
+    var list = user["token_ids"];
+    dev.log(user["token_ids"].toString());
+    String name;
+    String symbol;
+    String address;
+    for(dynamic tok in list) {
+      name = tok["name"];
+      symbol = tok["symbol"];
+      address = tok["address"];
+
+      Widget token = Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Card(
+          shadowColor: Colors.deepOrange,
+          elevation: 8,
+          clipBehavior: Clip.antiAlias,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.purpleAccent, Colors.deepOrange],
+                begin: Alignment.topRight,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+            padding: EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  symbol,
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.white,
+                  ),
+
+                ),
+                Text(
+                  address,
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.white,
+                  ),
+
+                ),
+              ],
             ),
           ),
-          padding: EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '500 VIA',
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '0x5f70ab98ce78ad115f105f70ab98ce78ad115f10',
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.white,
-                ),
-              ),
-            ],
-          ),
         ),
-      ),
-    );
+      );
+
+      tokens.add(token);
+
+    }
 
 
-    tokens.add(token);
     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
 
       return MenuPage(title: "Dstate", provider: provider, authToken: authToken, localIp: localIp, accountAddress: accountAddress, tokens: tokens);
