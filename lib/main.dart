@@ -95,7 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final buildingAddressController = TextEditingController();
   String accountAddress = "";
   String authToken = "";
-  String buildingId = "";
+  //String buildingId = "";
   String userId = "";
   bool isDialogShown = false;
   final connector = WalletConnect(
@@ -124,7 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   //Via: 10.154.200.10
   //Kamtjatka: 10.20.11.1
-  String localIp = "10.154.200.94"; //TODO Change ip
+  String localIp = "10.20.11.1"; //TODO Change ip
 
 
   Future<Response> fetchUsers(String publicAddress) {
@@ -326,12 +326,13 @@ class _MyHomePageState extends State<MyHomePage> {
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer ' + authToken,
       },
-    ); //TODO: finish
+    );
     Map<String, dynamic> decodedRsp =json.decode(rsp.body);
 
     var user = decodedRsp["user"];
     var list = user["token_ids"];
-    dev.log(user["token_ids"].toString());
+    dev.log(list.toString());
+    String username = user["userName"];
     String name;
     String symbol;
     String address;
@@ -339,6 +340,16 @@ class _MyHomePageState extends State<MyHomePage> {
       name = tok["name"];
       symbol = tok["symbol"];
       address = tok["address"];
+
+      Response rsp2 = await get(
+        Uri.parse('http://' + localIp + ':3001/token/balanceOf?tokenAddress=' + address), //REMEMBER TO CHANGE IP ADDRESS
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer ' + authToken,
+        },
+      );
+      Map<String, dynamic> decodedRsp2 =json.decode(rsp2.body);
+      String tokenAmount = (decodedRsp2["balance"]).toString();
 
       Widget token = Padding(
         padding: const EdgeInsets.all(8.0),
@@ -361,30 +372,50 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  name,
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+                Padding(
+                  padding: const EdgeInsets.all(2.0),
+                  child: Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: Icon(
+                          Icons.toll,
+                          size: 30,
+                        ),
+                      ),
+                      Text(
+                        name,
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  symbol,
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.white,
-                  ),
+                Padding(
+                  padding: const EdgeInsets.all(2.0),
+                  child: Text(
+                    tokenAmount + ' ' + symbol,
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.white,
+                    ),
 
+                  ),
                 ),
-                Text(
-                  address,
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.white,
-                  ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    address,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.white,
+                    ),
 
+                  ),
                 ),
               ],
             ),
@@ -396,10 +427,21 @@ class _MyHomePageState extends State<MyHomePage> {
 
     }
 
+    Response rsp3 = await get(
+      Uri.parse('http://' + localIp + ':3001/token/balanceInEth'), //REMEMBER TO CHANGE IP ADDRESS
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer ' + authToken,
+      },
+
+    );
+    Map<String, dynamic> decodedRsp3 =json.decode(rsp3.body);
+    String eth = (decodedRsp3["balance"]).toString();
+
 
     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
 
-      return MenuPage(title: "Dstate", provider: provider, authToken: authToken, localIp: localIp, accountAddress: accountAddress, tokens: tokens);
+      return MenuPage(title: "Dstate", provider: provider, authToken: authToken, localIp: localIp, accountAddress: accountAddress, tokens: tokens, ethBalance: eth.substring(0,7), username: username);
 
     }));
   }

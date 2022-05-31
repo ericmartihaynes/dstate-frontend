@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:dstate/individual_proposal.dart';
 import 'package:dstate/rent.dart';
 import 'package:dstate/voting.dart';
 import 'package:flutter/cupertino.dart';
@@ -74,7 +75,7 @@ class _MyHomePageState extends State<ProposalsPage> {
         ),
       ),
     );
-    if(widget.proposals[0].runtimeType.toString() == "Padding") {
+    if(widget.proposals.isEmpty || widget.proposals[0].runtimeType.toString() == "Padding") {
       widget.proposals.insert(0, votingButton);
     }
   }
@@ -245,6 +246,7 @@ class _MyHomePageState extends State<ProposalsPage> {
       await beforeRent();
     }
   }
+
 
   _showDialog(BuildContext context) {
     return showDialog(

@@ -27,9 +27,11 @@ final address0Controller = TextEditingController();
 final proposalIdController = TextEditingController();
 int _selectedIndex = 2;
 
-class VotingPage extends StatefulWidget {
-  const VotingPage(
-      {Key? key, required this.title, required this.authToken, required this.localIp, required this.accountAddress, required this.provider,  required this.buildingId, required this.tokenAddress, required this.rentAddress})
+class individualProposalPage extends StatefulWidget {
+  const individualProposalPage(
+      {Key? key, required this.title, required this.authToken, required this.localIp, required this.accountAddress, required this.provider,
+        required this.buildingId, required this.tokenAddress, required this.rentAddress, required this.title2, required this.description,
+        required this.proposalType, required this.id, required this.uint0, required this.uint1, required this.uint2, required this.address0,})
       : super(key: key);
   final String title;
   final String authToken;
@@ -39,11 +41,19 @@ class VotingPage extends StatefulWidget {
   final String tokenAddress;
   final String buildingId;
   final String rentAddress;
+  final String title2;
+  final String description;
+  final int proposalType;
+  final int id;
+  final int uint0;
+  final int uint1;
+  final int uint2;
+  final String address0;
   @override
-  State<VotingPage> createState() => _MyHomePageState();
+  State<individualProposalPage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<VotingPage> {
+class _MyHomePageState extends State<individualProposalPage> {
   bool isDialogShown = false;
 
   void createProposal(String buildingId, String tokenAddress, String title, String description, int proposalType, int uint0, int uint1, int uint2, String address0) async {
@@ -119,6 +129,7 @@ class _MyHomePageState extends State<VotingPage> {
     if(isDialogShown){Navigator.pop(context);}
     print("Voted!");
     print(tx);
+    Navigator.pop(context);
   }
 
   beforeRent() async {
@@ -232,6 +243,7 @@ class _MyHomePageState extends State<VotingPage> {
         }
     ).whenComplete(() => isDialogShown = false);
   }
+//TODO: Route to get number of votes and if passed or not
 //TODO: Make adaptive
   @override
   Widget build(BuildContext context) {
@@ -244,85 +256,112 @@ class _MyHomePageState extends State<VotingPage> {
           //crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: Text(
-                'Token Price:  Ξ',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: TextFormField(
-                controller: titleController,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'Title',
+              padding: const EdgeInsets.all(8.0),
+              child: Card(
+                shadowColor: Colors.purple,
+                elevation: 8,
+                clipBehavior: Clip.antiAlias,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
                 ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: TextFormField(
-                controller: descriptionController,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'Description',
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: TextFormField(
-                controller: proposalTypeController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'Proposal Type',
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: TextFormField(
-                controller: uint0Controller,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'uint0',
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: TextFormField(
-                controller: uint1Controller,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'uint1',
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: TextFormField(
-                controller: uint2Controller,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'uint2',
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: TextFormField(
-                controller: address0Controller,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'address0',
+                child: InkWell(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.redAccent, Colors.purple],
+                        begin: Alignment.topRight,
+                        end: Alignment.bottomCenter,
+                      ),
+                    ),
+                    padding: EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Text(
+                            widget.title2,
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Text(
+                            widget.description,
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Text(
+                            'Proposal type: ' + widget.proposalType.toString(),
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Text(
+                            'Proposal id: ' + widget.id.toString(),
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Text(
+                            'uint0: ' + widget.uint0.toString(),
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Text(
+                            'uint1: ' + widget.uint1.toString(),
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Text(
+                            'uint2: ' + widget.uint2.toString(),
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Text(
+                            'address0: ' + widget.address0,
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -331,26 +370,17 @@ class _MyHomePageState extends State<VotingPage> {
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-                  primary: Colors.cyan,
+                  primary: Colors.cyanAccent,
                   padding: const EdgeInsets.all(16.0),
                   textStyle: const TextStyle(fontSize: 22, fontFamily: 'Poppins'),
                 ),
-                onPressed: () => createProposal(widget.buildingId, widget.tokenAddress, titleController.text, descriptionController.text, int.parse(proposalTypeController.text), int.parse(uint0Controller.text), int.parse(uint1Controller.text), int.parse(uint2Controller.text), address0Controller.text),
+                onPressed: () => vote(widget.buildingId, widget.tokenAddress, widget.id),
                 //{/*628b802a01929414d3cfaab8*/ /*0xe922e9152c588e9fceddd239f6aaf19b2eec0d6f*/},
-                child: const Text('Create Proposal'),
+                child: const Text('Vote'),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: TextFormField(
-                controller: proposalIdController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'Proposal Id',
-                ),
-              ),
-            ),
+
+
           ],
 
         ),

@@ -21,7 +21,7 @@ import 'buildings.dart';
 
 
 class MenuPage extends StatefulWidget {
-  const MenuPage ({Key? key, required this.title, required this.provider, required this.authToken, required this.localIp, required this.accountAddress, required this.tokens}) : super(key: key);
+  const MenuPage ({Key? key, required this.title, required this.provider, required this.authToken, required this.localIp, required this.accountAddress, required this.tokens, required this.ethBalance, required this.username}) : super(key: key);
 
 
   // This widget is the home page of your application. It is stateful, meaning
@@ -39,6 +39,8 @@ class MenuPage extends StatefulWidget {
   final String localIp;
   final String accountAddress;
   final List<Widget> tokens;
+  final String ethBalance;
+  final String username;
 
 
 
@@ -79,32 +81,44 @@ class _MyHomePageState extends State<MenuPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    'Username',
-                    style: TextStyle(
-                      fontSize: 20,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  padding: const EdgeInsets.only(top: 10.0, bottom: 10.0, right: 2.0, left: 2.0),
+                  child: Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 10.0),
+                        child: Icon(
+                          Icons.account_circle,
+                          size: 45,
+                        ),
+                      ),
+                      Text(
+                        widget.username,
+                        style: TextStyle(
+                          fontSize: 30,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 4),
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.only(top: 10.0, bottom: 10.0, right: 2.0, left: 2.0),
                   child: Text(
-                    '15 ETH',
+                    widget.ethBalance + ' ETH',
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 25,
                       color: Colors.white,
                     ),
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.only(top: 10.0, bottom: 10.0, right: 2.0, left: 2.0),
                   child: Text(
-                    '0x7170ab98ce78ad115f105f70ab98ce78ad115f10',
+                    widget.accountAddress,
                     style: TextStyle(
                       fontSize: 20,
                       color: Colors.white,
@@ -140,12 +154,14 @@ class _MyHomePageState extends State<MenuPage> {
     String address;
     String token = "";
     String rent = "";
+    String buildingId;
 
     for(dynamic building in list) {
       print(building);
       name = building["name"];
       address = building["address"];
-      try{ token = building["token_id"];} catch(e){} //TODO: finish
+      buildingId = building["_id"];
+      try{ token = building["token_id"]["address"];} catch(e){} //TODO: maybe add diferent pictures
       try{ rent = building["rentContractAddress"];} catch(e){}
       buildingCard = Padding(
         padding: const EdgeInsets.all(8.0),
@@ -163,7 +179,7 @@ class _MyHomePageState extends State<MenuPage> {
                       'http://placeimg.com/640/480/arch',
                     ),
                     child: InkWell(
-                      onTap: () => beforeBuySell('0x06c6005575b12e691046DCD52CBD0e3e1A8FF9a4', '0x7aA7b5e70D361c3e1Fc9E24a841f1440276d0d74', '62936fec385e672267bc77ee'),
+                      onTap: () => beforeBuySell(token, rent, buildingId),
                     ),
                     height: 240,
                     fit: BoxFit.cover,
@@ -186,11 +202,23 @@ class _MyHomePageState extends State<MenuPage> {
               ),
               Padding(
                 padding: EdgeInsets.all(16).copyWith(bottom: 0),
-                child: Text(
-                  address + ' ' + token + '' + rent,
-                  style: TextStyle(fontSize: 16),
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Text(
+                        address,
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ),
+                    Text(
+                      token,
+                      style: TextStyle(fontSize: 12),
+                    ),
+                  ],
                 ),
               ),
+
               ButtonBar()
             ],
           ),

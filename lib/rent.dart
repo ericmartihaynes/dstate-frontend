@@ -261,6 +261,7 @@ class _MyHomePageState extends State<RentPage> {
       }),//TODO: lazy loading
     );
     Map<String, dynamic> decodedRsp =json.decode(rsp.body);
+    //dev.log(decodedRsp.toString());
 
     Widget proposal;
     var list = decodedRsp["proposals"];

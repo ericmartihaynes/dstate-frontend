@@ -20,6 +20,8 @@ import 'package:walletconnect_dart/walletconnect_dart.dart';
 import 'package:dart_web3/dart_web3.dart';
 import 'package:convert/convert.dart';
 
+import 'individual_proposal.dart';
+
 final pricePerTokenController = TextEditingController();
 final amountToSellController = TextEditingController();
 final amountToBuyController = TextEditingController();
@@ -51,7 +53,7 @@ class BuySellPage extends StatefulWidget {
 
 class _MyHomePageState extends State<BuySellPage> {
   bool isDialogShown = false;
-  String buySellAddress = "";
+  String buySellAddress = "0xc5C00BAb417678FcE914E312dA401569b007b50F";
 
   void sellToken(double ethAmount, double tokenAmount, String buildingId, String tokenAddress) async {
     Response rsp = await post(
@@ -71,17 +73,17 @@ class _MyHomePageState extends State<BuySellPage> {
     Map<String, dynamic> decodedRsp =json.decode(rsp.body);
     String data2 = decodedRsp["abi"];
     int nonce = int.parse(decodedRsp["nonce"].toString());
-    String needToApprove = decodedRsp["approve"];
+    bool needToApprove = decodedRsp["approve"];
     data2 = data2.substring(2);
     const Utf8Encoder encoder = Utf8Encoder();
     List<int> value = hex.decode(data2);
     Uint8List encodedData = Uint8List.fromList(value);
     var tx;
-    if(needToApprove == "false") {
+    if(!needToApprove) {
       isDialogShown = true;
       _showDialog(context);
       tx = await widget.provider.sendTransaction(from: widget.accountAddress,
-          to: "0x392F7bAccBfE1324df91298ae9Ffc153111CED7c", //TODO: Change to buysell
+          to: buySellAddress,
           data: encodedData,
           nonce: nonce,
           gas: 1500000);
@@ -145,7 +147,7 @@ class _MyHomePageState extends State<BuySellPage> {
     isDialogShown = true;
     _showDialog(context);
     tx = await widget.provider.sendTransaction(from: widget.accountAddress,
-        to: "0x392F7bAccBfE1324df91298ae9Ffc153111CED7c",
+        to: buySellAddress,
         data: encodedData,
         value: BigInt.parse(price),
         nonce: nonce,
@@ -155,7 +157,7 @@ class _MyHomePageState extends State<BuySellPage> {
     print("Bought!");
     print(tx);
   }
-//TODO: change buysell address
+
   void cancelToken(double tokenAmount, String buildingId, String tokenAddress) async {
     Response rsp = await post(
       Uri.parse('http://' + widget.localIp + ':3001/building/cancelSale'), //REMEMBER TO CHANGE IP ADDRESS
@@ -181,7 +183,7 @@ class _MyHomePageState extends State<BuySellPage> {
     isDialogShown = true;
     _showDialog(context);
     tx = await widget.provider.sendTransaction(from: widget.accountAddress,
-        to: "0x392F7bAccBfE1324df91298ae9Ffc153111CED7c",
+        to: buySellAddress,
         data: encodedData,
         nonce: nonce,
         gas: 1500000);
@@ -236,36 +238,41 @@ class _MyHomePageState extends State<BuySellPage> {
           clipBehavior: Clip.antiAlias,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
+
           ),
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.redAccent, Colors.purple],
-                begin: Alignment.topRight,
-                end: Alignment.bottomCenter,
+          child: InkWell(
+            onTap: () {beforeIndividualProposal(title, description, proposalType,
+                id, uint0, uint1, uint2, address0);},
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.redAccent, Colors.purple],
+                  begin: Alignment.topRight,
+                  end: Alignment.bottomCenter,
+                ),
               ),
-            ),
-            padding: EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+              padding: EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  description,
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.white,
+                  const SizedBox(height: 4),
+                  Text(
+                    description,
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -275,7 +282,7 @@ class _MyHomePageState extends State<BuySellPage> {
     }
 
 
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+    Navigator.push(context, MaterialPageRoute(builder: (context) {
       return ProposalsPage(title: 'Proposals',
           authToken: widget.authToken,
           localIp: widget.localIp,
@@ -348,6 +355,30 @@ class _MyHomePageState extends State<BuySellPage> {
           );
         }
     ).whenComplete(() => isDialogShown = false);
+  }
+
+  beforeIndividualProposal(String title, String description, int proposalType,
+      int id, int uint0, int uint1, int uint2, String address0) {
+    Navigator.push(context, MaterialPageRoute(builder: (context) {
+      return individualProposalPage(
+        title: title,
+        authToken: widget.authToken,
+        localIp: widget.localIp,
+        accountAddress: widget.accountAddress,
+        provider: widget.provider,
+        buildingId: widget.buildingId,
+        tokenAddress: widget.tokenAddress,
+        rentAddress: widget.rentAddress,
+        title2: title,
+        description: description,
+        proposalType: proposalType,
+        id: id,
+        uint0: uint0,
+        uint1: uint1,
+        uint2: uint2,
+        address0: address0,
+      );
+    }));
   }
 
   @override

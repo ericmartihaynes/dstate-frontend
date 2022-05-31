@@ -45,6 +45,7 @@ class TokenPage extends StatefulWidget {
 class _MyHomePageState extends State<TokenPage> {
   int _counter = 0;
   final nameController = TextEditingController();
+  final symbolController = TextEditingController();
   final amountController = TextEditingController();
   final rentPriceController = TextEditingController();
   final depositPriceController = TextEditingController();
@@ -55,7 +56,7 @@ class _MyHomePageState extends State<TokenPage> {
   bool isDialogShown = false;
 
   //Send data to backend
-  Future<Response> sendData(String name, double tokenAmount, double rentPrice, double depositPrice, int remainingMonths, int caretakerShare, String caretaker, String tenant) {
+  Future<Response> sendData(String name, String symbol, double tokenAmount, double rentPrice, double depositPrice, int remainingMonths, int caretakerShare, String caretaker, String tenant) {
     print(name + " " + tokenAmount.toString());
     return post(
       Uri.parse('http://' + widget.localIp + ':3001/building/deploy'), //REMEMBER TO CHANGE IP ADDRESS
@@ -66,7 +67,7 @@ class _MyHomePageState extends State<TokenPage> {
       body: jsonEncode(<String, dynamic>{
         'name': name,
         'initial_amount': tokenAmount.toInt().toString(),
-        'symbol': 'PLACEHOLDER', //TODO: Change this
+        'symbol': symbol,
         'building_id': widget.buildingId,
         'rentPrice': (rentPrice * pow(10,18)).toInt(), //times 10**18
         'depositPrice': (depositPrice * pow(10,18)).toInt(), //times 10**18
@@ -83,8 +84,8 @@ class _MyHomePageState extends State<TokenPage> {
 
 
 
-  Future<Response> createToken(String name, double tokenAmount, String buildingId, double rentPrice, double depositPrice, int remainingMonths, int caretakerShare, String caretaker, String tenant) async {
-    Response rsp = await sendData(name, tokenAmount, rentPrice, depositPrice, remainingMonths, caretakerShare, caretaker, tenant);
+  Future<Response> createToken(String name, String symbol, double tokenAmount, String buildingId, double rentPrice, double depositPrice, int remainingMonths, int caretakerShare, String caretaker, String tenant) async {
+    Response rsp = await sendData(name, symbol, tokenAmount, rentPrice, depositPrice, remainingMonths, caretakerShare, caretaker, tenant);
     Map<String, dynamic> decodedRsp =json.decode(rsp.body);
     String data2 = decodedRsp["abi"];
     data2 = data2.substring(2);
@@ -111,7 +112,7 @@ class _MyHomePageState extends State<TokenPage> {
         'name': name,
         'initial_amount': tokenAmount.toInt().toString(),
         'building_id': buildingId,
-        'symbol': "DST11", //TODO: look into this
+        'symbol': symbol,
         'transactionHash' : tx,
       }),
     );
@@ -163,7 +164,7 @@ class _MyHomePageState extends State<TokenPage> {
         }
     ).whenComplete(() => isDialogShown = false);
   }
-
+//TODO: Make adaptive
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -192,6 +193,17 @@ class _MyHomePageState extends State<TokenPage> {
                 decoration: const InputDecoration(
                   border: UnderlineInputBorder(),
                   labelText: 'Name of Token',
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+              child: TextFormField(
+                controller: symbolController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  border: UnderlineInputBorder(),
+                  labelText: 'Symbol',
                 ),
               ),
             ),
@@ -279,7 +291,7 @@ class _MyHomePageState extends State<TokenPage> {
                   padding: const EdgeInsets.all(16.0),
                   textStyle: const TextStyle(fontSize: 22, fontFamily: 'Poppins'),
                 ),
-                onPressed: () => createToken(nameController.text, double.parse(amountController.text), widget.buildingId, double.parse(rentPriceController.text), double.parse(depositPriceController.text), int.parse(remainingMonthsController.text), int.parse(caretakerShareController.text), caretakerController.text, tenantController.text),
+                onPressed: () => createToken(nameController.text, symbolController.text, double.parse(amountController.text), widget.buildingId, double.parse(rentPriceController.text), double.parse(depositPriceController.text), int.parse(remainingMonthsController.text), int.parse(caretakerShareController.text), caretakerController.text, tenantController.text),
                 child: const Text('Create Token'),
               ),
             ),

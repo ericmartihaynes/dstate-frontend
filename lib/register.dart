@@ -42,6 +42,7 @@ class RegisterPage extends StatefulWidget {
 
 
 
+
   @override
   State<RegisterPage> createState() => _MyHomePageState();
 }
@@ -57,6 +58,7 @@ class _MyHomePageState extends State<RegisterPage> {
   final buildingNameController = TextEditingController();
   final buildingAddressController = TextEditingController();
   String authToken = "";
+  String userId = "";
   bool isDialogShown = false;
 
 
@@ -119,6 +121,7 @@ class _MyHomePageState extends State<RegisterPage> {
       Map<String, dynamic> jwtDecoded =json.decode(jwtResponse.body);
 
       authToken = jwtDecoded["accessToken"];
+      userId = jwtDecoded["user_id"];
       print(authToken);
       setState(() {
         uiMetamaskConnected = true;
@@ -187,12 +190,129 @@ class _MyHomePageState extends State<RegisterPage> {
   }
 
 
-  beforeMenu() { //TODO: paste from main
+  beforeMenu() async {
     List<Widget> tokens = [];
+    Response rsp = await get(
+      Uri.parse('http://' + widget.localIp + ':3001/users/profile/' + userId),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer ' + authToken,
+      },
+    );
+    Map<String, dynamic> decodedRsp =json.decode(rsp.body);
+
+    var user = decodedRsp["user"];
+    var list = user["token_ids"];
+    String username = user["userName"];
+    String name;
+    String symbol;
+    String address;
+    for(dynamic tok in list) {
+      name = tok["name"];
+      symbol = tok["symbol"];
+      address = tok["address"];
+
+      Response rsp2 = await get(
+        Uri.parse('http://' + widget.localIp + ':3001/token/balanceOf?tokenAddress=' + address), //REMEMBER TO CHANGE IP ADDRESS
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer ' + authToken,
+        },
+      );
+      Map<String, dynamic> decodedRsp2 =json.decode(rsp2.body);
+      String tokenAmount = (decodedRsp2["balance"]).toString();
+
+      Widget token = Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Card(
+          shadowColor: Colors.deepOrange,
+          elevation: 8,
+          clipBehavior: Clip.antiAlias,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.purpleAccent, Colors.deepOrange],
+                begin: Alignment.topRight,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+            padding: EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(2.0),
+                  child: Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: Icon(
+                          Icons.toll,
+                          size: 30,
+                        ),
+                      ),
+                      Text(
+                        name,
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Padding(
+                  padding: const EdgeInsets.all(2.0),
+                  child: Text(
+                    tokenAmount + ' ' + symbol,
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.white,
+                    ),
+
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    address,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.white,
+                    ),
+
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      tokens.add(token);
+
+    }
+
+    Response rsp3 = await get(
+      Uri.parse('http://' + widget.localIp + ':3001/token/balanceInEth'), //REMEMBER TO CHANGE IP ADDRESS
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer ' + authToken,
+      },
+
+    );
+    Map<String, dynamic> decodedRsp3 =json.decode(rsp3.body);
+    String eth = (decodedRsp3["balance"]).toString();
+
 
     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
 
-      return MenuPage(title: "Dstate", provider: widget.provider, authToken: authToken, localIp: widget.localIp, accountAddress: widget.accountAddress, tokens: tokens);
+      return MenuPage(title: "Dstate", provider: widget.provider, authToken: authToken, localIp: widget.localIp, accountAddress: widget.accountAddress, tokens: tokens, ethBalance: eth.substring(0,7), username: username);
 
     }));
   }
