@@ -116,21 +116,21 @@ class _MyHomePageState extends State<individualProposalPage> {
     );
     Map<String, dynamic> decodedRsp =json.decode(rsp.body);
 
-    String data2 = decodedRsp["abi"];
-    int nonce = int.parse(decodedRsp["nonce"].toString());
-    data2 = data2.substring(2);
-    const Utf8Encoder encoder = Utf8Encoder();
-    List<int> value = hex.decode(data2);
-    Uint8List encodedData = Uint8List.fromList(value);
-    var tx;
-    isDialogShown = true;
-    _showDialog(context);
-    tx = await widget.provider.sendTransaction(from: widget.accountAddress,
-        to: tokenAddress,
-        data: encodedData,
-        nonce: nonce,
-        gas: 1500000);
-    if(isDialogShown){Navigator.pop(context);}
+      String data2 = decodedRsp["abi"];
+      int nonce = int.parse(decodedRsp["nonce"].toString());
+      data2 = data2.substring(2);
+      const Utf8Encoder encoder = Utf8Encoder();
+      List<int> value = hex.decode(data2);
+      Uint8List encodedData = Uint8List.fromList(value);
+      var tx;
+      isDialogShown = true;
+      _showDialog(context);
+      tx = await widget.provider.sendTransaction(from: widget.accountAddress,
+          to: tokenAddress,
+          data: encodedData,
+          nonce: nonce,
+          gas: 1500000);
+      if(isDialogShown){Navigator.pop(context);}
     print("Voted!");
     print(tx);
     Navigator.pop(context);

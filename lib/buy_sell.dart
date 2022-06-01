@@ -53,7 +53,7 @@ class BuySellPage extends StatefulWidget {
 
 class _MyHomePageState extends State<BuySellPage> {
   bool isDialogShown = false;
-  String buySellAddress = "0xc5C00BAb417678FcE914E312dA401569b007b50F";
+  String buySellAddress = "0x30b0D3F956B300733f9e3B16767acCd70cFb777D";
 
   void sellToken(double ethAmount, double tokenAmount, String buildingId, String tokenAddress) async {
     Response rsp = await post(
