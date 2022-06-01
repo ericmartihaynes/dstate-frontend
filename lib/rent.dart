@@ -18,6 +18,8 @@ import 'package:walletconnect_dart/walletconnect_dart.dart';
 import 'package:dart_web3/dart_web3.dart';
 import 'package:convert/convert.dart';
 
+import 'individual_proposal.dart';
+
 final previousRentController = TextEditingController();
 final depositProposalController = TextEditingController();
 final depositAcceptRejectController = TextEditingController();
@@ -265,23 +267,24 @@ class _MyHomePageState extends State<RentPage> {
 
     Widget proposal;
     var list = decodedRsp["proposals"];
-    String title;
-    String description;
-    int proposalType;
-    int id;
-    int uint0;
-    int uint1;
-    int uint2;
-    String address0;
+    //String title;
+    //String description;
+    //int proposalType;
+    //int id;
+    //int uint0;
+    //int uint1;
+    //int uint2;
+    //String address0;
+
     for(dynamic prop in list) {
-      title = prop["title"];
-      description = prop["description"];
-      proposalType = int.parse(prop["proposalType"]);
-      id = int.parse(prop["id"]);
-      uint0 = int.parse(prop["uint0"]);
-      uint1 = int.parse(prop["uint1"]);
-      uint2 = int.parse(prop["uint2"]);
-      address0 = prop["address0"];
+      final String title = prop["title"];
+      final String description = prop["description"];
+      final int proposalType = int.parse(prop["proposalType"]);
+      final int id = int.parse(prop["id"]);
+      final int uint0 = int.parse(prop["uint0"]);
+      final int uint1 = int.parse(prop["uint1"]);
+      final int uint2 = int.parse(prop["uint2"]);
+      final String address0 = prop["address0"];
 
       proposal = Padding(
         padding: const EdgeInsets.all(8.0),
@@ -291,36 +294,41 @@ class _MyHomePageState extends State<RentPage> {
           clipBehavior: Clip.antiAlias,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
+
           ),
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.redAccent, Colors.purple],
-                begin: Alignment.topRight,
-                end: Alignment.bottomCenter,
+          child: InkWell(
+            onTap: () {beforeIndividualProposal(title, description, proposalType,
+                id, uint0, uint1, uint2, address0);},
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.redAccent, Colors.purple],
+                  begin: Alignment.topRight,
+                  end: Alignment.bottomCenter,
+                ),
               ),
-            ),
-            padding: EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+              padding: EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  description,
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.white,
+                  const SizedBox(height: 4),
+                  Text(
+                    description,
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -330,7 +338,7 @@ class _MyHomePageState extends State<RentPage> {
     }
 
 
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+    Navigator.push(context, MaterialPageRoute(builder: (context) {
       return ProposalsPage(title: 'Proposals',
           authToken: widget.authToken,
           localIp: widget.localIp,
@@ -422,6 +430,54 @@ class _MyHomePageState extends State<RentPage> {
           );
         }
     ).whenComplete(() => isDialogShown = false);
+  }
+
+  beforeIndividualProposal(String title, String description, int proposalType,
+      int id, int uint0, int uint1, int uint2, String address0) async {
+
+
+    String votesNumber;
+    bool accepted;
+
+    Response rsp = await post(
+      Uri.parse('http://' + widget.localIp + ':3001/token/checkForProposals'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer ' + widget.authToken,
+      },
+      body: jsonEncode(<String, dynamic>{
+        'proposalId': id,
+        'tokenAddress': widget.tokenAddress,
+
+      }),//TODO: lazy loading
+    );
+    Map<String, dynamic> decodedRsp =json.decode(rsp.body);
+    var prop = decodedRsp["proposals"];
+
+    votesNumber = prop[0]["votesN"];
+    accepted = prop[0]["votingResult"];
+    Navigator.push(context, MaterialPageRoute(builder: (context) {
+      return individualProposalPage(
+          title: title,
+          authToken: widget.authToken,
+          localIp: widget.localIp,
+          accountAddress: widget.accountAddress,
+          provider: widget.provider,
+          buildingId: widget.buildingId,
+          tokenAddress: widget.tokenAddress,
+          rentAddress: widget.rentAddress,
+          title2: title,
+          description: description,
+          proposalType: proposalType,
+          id: id,
+          uint0: uint0,
+          uint1: uint1,
+          uint2: uint2,
+          address0: address0,
+          votesNumber: votesNumber,
+          accepted: accepted
+      );
+    }));
   }
 
   @override

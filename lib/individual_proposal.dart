@@ -31,7 +31,8 @@ class individualProposalPage extends StatefulWidget {
   const individualProposalPage(
       {Key? key, required this.title, required this.authToken, required this.localIp, required this.accountAddress, required this.provider,
         required this.buildingId, required this.tokenAddress, required this.rentAddress, required this.title2, required this.description,
-        required this.proposalType, required this.id, required this.uint0, required this.uint1, required this.uint2, required this.address0,})
+        required this.proposalType, required this.id, required this.uint0, required this.uint1, required this.uint2, required this.address0,
+        required this.votesNumber, required this.accepted})
       : super(key: key);
   final String title;
   final String authToken;
@@ -49,6 +50,9 @@ class individualProposalPage extends StatefulWidget {
   final int uint1;
   final int uint2;
   final String address0;
+  final String votesNumber;
+  final bool accepted;
+
   @override
   State<individualProposalPage> createState() => _MyHomePageState();
 }
@@ -243,7 +247,6 @@ class _MyHomePageState extends State<individualProposalPage> {
         }
     ).whenComplete(() => isDialogShown = false);
   }
-//TODO: Route to get number of votes and if passed or not
 //TODO: Make adaptive
   @override
   Widget build(BuildContext context) {
@@ -353,6 +356,26 @@ class _MyHomePageState extends State<individualProposalPage> {
                           padding: const EdgeInsets.all(4.0),
                           child: Text(
                             'address0: ' + widget.address0,
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Text(
+                            'Votes: ' + widget.votesNumber,
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Text(
+                            'accepted: ' + widget.accepted.toString(),
                             style: TextStyle(
                               fontSize: 20,
                               color: Colors.white,

@@ -131,7 +131,7 @@ class _MyHomePageState extends State<MenuPage> {
         ),
       ),
     );
-    if (widget.tokens[0].runtimeType.toString() == "Padding") {
+    if (widget.tokens.isEmpty || widget.tokens[0].runtimeType.toString() == "Padding") {
       widget.tokens.insert(0, personalCard);
     }
   }
@@ -150,17 +150,19 @@ class _MyHomePageState extends State<MenuPage> {
     Map<String, dynamic> decodedRsp =json.decode(rsp.body);
     var list = decodedRsp["buildings"];
     Widget buildingCard;
-    String name;
-    String address;
-    String token = "";
-    String rent = "";
-    String buildingId;
+    //String name;
+    //String address;
+    //String token = "";
+    //String rent = "";
+    //String buildingId;
 
     for(dynamic building in list) {
       print(building);
-      name = building["name"];
-      address = building["address"];
-      buildingId = building["_id"];
+      final String name = building["name"];
+      final String address = building["address"];
+      final String buildingId = building["_id"];
+      String token = "0x0000000000000000000000000000000000000000";
+      String rent = "0x0000000000000000000000000000000000000000";
       try{ token = building["token_id"]["address"];} catch(e){} //TODO: maybe add diferent pictures
       try{ rent = building["rentContractAddress"];} catch(e){}
       buildingCard = Padding(
@@ -244,7 +246,7 @@ class _MyHomePageState extends State<MenuPage> {
         'Authorization': 'Bearer ' + widget.authToken,
       },
       body: jsonEncode(<String, dynamic>{
-        'building_id': buildingId2,
+        'building_id': _buildingId,
         'tokenAmount': 1,
         'tokenAddress': _tokenAddress,
 

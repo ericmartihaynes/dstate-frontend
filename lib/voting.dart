@@ -20,10 +20,10 @@ import 'package:convert/convert.dart';
 final titleController = TextEditingController();
 final descriptionController = TextEditingController();
 final proposalTypeController = TextEditingController();
-final uint0Controller = TextEditingController();
-final uint1Controller = TextEditingController();
-final uint2Controller = TextEditingController();
-final address0Controller = TextEditingController();
+final uint0Controller = TextEditingController(text:"0");
+final uint1Controller = TextEditingController(text:"0");
+final uint2Controller = TextEditingController(text:"0");
+final address0Controller = TextEditingController(text:"0x0000000000000000000000000000000000000000");
 final proposalIdController = TextEditingController();
 int _selectedIndex = 2;
 
@@ -45,6 +45,18 @@ class VotingPage extends StatefulWidget {
 
 class _MyHomePageState extends State<VotingPage> {
   bool isDialogShown = false;
+  List<String> proposalTypes = ["Generic Proposal", "Change Price Rent Price", "Change Deposit Price",
+    "Change Caretaker Share", "Replace Caretaker", "Remove Tenant", "Accept New Tenant", "Renew Current Contract"];
+  String selectedProposalType = "Generic Proposal";
+  bool showUint0 = false;
+  bool showUint1 = false;
+  bool showUint2 = false;
+  bool showAddress0 = false;
+  String labelUint0 = "";
+  String labelUint1 = "";
+  String labelUint2 = "";
+  String labelAddress0 = "";
+
 
   void createProposal(String buildingId, String tokenAddress, String title, String description, int proposalType, int uint0, int uint1, int uint2, String address0) async {
     Response rsp = await post(
@@ -232,6 +244,129 @@ class _MyHomePageState extends State<VotingPage> {
         }
     ).whenComplete(() => isDialogShown = false);
   }
+
+  changeProposalType() {
+    int type = 0;
+    switch (selectedProposalType) {
+      case "Generic Proposal":
+        {
+          type = 0;
+          showUint0 = false;
+          uint0Controller.text = "0";
+          showUint1 = false;
+          uint1Controller.text = "0";
+          showUint2 = false;
+          uint2Controller.text = "0";
+          showAddress0 = false;
+          address0Controller.text = "0x0000000000000000000000000000000000000000";
+        }
+        break;
+      case "Change Price Rent Price":
+        {
+          type = 1;
+          showUint0 = true;
+          uint0Controller.text = "";
+          labelUint0 = "New Rent Price";
+          showUint1 = false;
+          uint1Controller.text = "0";
+          showUint2 = false;
+          uint2Controller.text = "0";
+          showAddress0 = false;
+          address0Controller.text = "0x0000000000000000000000000000000000000000";
+        }
+        break;
+      case "Change Deposit Price":
+        {
+          type = 2;
+          showUint0 = true;
+          uint0Controller.text = "";
+          labelUint0 = "New Deposit Price";
+          showUint1 = false;
+          uint1Controller.text = "0";
+          showUint2 = false;
+          uint2Controller.text = "0";
+          showAddress0 = false;
+          address0Controller.text = "0x0000000000000000000000000000000000000000";
+        }
+        break;
+      case "Change Caretaker Share":
+        {
+          type = 3;
+          showUint0 = true;
+          uint0Controller.text = "";
+          labelUint0 = "New Caretaker Share";
+          showUint1 = false;
+          uint1Controller.text = "0";
+          showUint2 = false;
+          uint2Controller.text = "0";
+          showAddress0 = false;
+          address0Controller.text = "0x0000000000000000000000000000000000000000";
+        }
+        break;
+      case "Replace Caretaker":
+        {
+          type = 4;
+          showUint0 = false;
+          uint0Controller.text = "0";
+          showUint1 = false;
+          uint1Controller.text = "0";
+          showUint2 = false;
+          uint2Controller.text = "0";
+          showAddress0 = true;
+          address0Controller.text = "";
+          labelAddress0 = "New Caretaker Public Address";
+        }
+        break;
+      case "Remove Tenant":
+        {
+          type = 5;
+          showUint0 = false;
+          uint0Controller.text = "0";
+          showUint1 = false;
+          uint1Controller.text = "0";
+          showUint2 = false;
+          uint2Controller.text = "0";
+          showAddress0 = false;
+          address0Controller.text = "0x0000000000000000000000000000000000000000";
+        }
+        break;
+      case "Accept New Tenant":
+        {
+          type = 6;
+          showUint0 = true;
+          uint0Controller.text = "";
+          labelUint0 = "Duration of contract (Months)";
+          showUint1 = true;
+          uint1Controller.text = "";
+          labelUint1 = "New Rent Price";
+          showUint2 = true;
+          uint2Controller.text = "";
+          labelUint2 = "New Deposit Price";
+          showAddress0 = true;
+          address0Controller.text = "";
+          labelAddress0 = "New Tenant Public Address";
+        }
+        break;
+      case "Renew Current Contract":
+        {
+          type = 7;
+          showUint0 = true;
+          uint0Controller.text = "";
+          labelUint0 = "Extension of contract (Months)";
+          showUint1 = false;
+          uint1Controller.text = "0";
+          showUint2 = false;
+          uint2Controller.text = "0";
+          showAddress0 = false;
+          address0Controller.text = "0x0000000000000000000000000000000000000000";
+        }
+        break;
+
+    }
+    proposalTypeController.text = type.toString();
+
+  }
+
 //TODO: Make adaptive
   @override
   Widget build(BuildContext context) {
@@ -273,56 +408,69 @@ class _MyHomePageState extends State<VotingPage> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: TextFormField(
-                controller: proposalTypeController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'Proposal Type',
+              padding: const EdgeInsets.all(8.0),
+              child: DropdownButton(
+                  value: selectedProposalType,
+                  items: proposalTypes
+                      .map((item) => DropdownMenuItem<String>(
+                            value: item,
+                            child: Text(item),
+                          ))
+                      .toList(),
+                  onChanged: (item) => {setState(() => selectedProposalType = item.toString()), changeProposalType()}),
+            ),//
+            Visibility(
+              visible: showUint0,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                child: TextFormField(
+                  controller: uint0Controller,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    border: UnderlineInputBorder(),
+                    labelText: labelUint0,
+                  ),
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: TextFormField(
-                controller: uint0Controller,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'uint0',
+            Visibility(
+              visible: showUint1,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                child: TextFormField(
+                  controller: uint1Controller,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    border: UnderlineInputBorder(),
+                    labelText: labelUint1,
+                  ),
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: TextFormField(
-                controller: uint1Controller,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'uint1',
+            Visibility(
+              visible: showUint2,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                child: TextFormField(
+                  controller: uint2Controller,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    border: UnderlineInputBorder(),
+                    labelText: labelUint2,
+                  ),
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: TextFormField(
-                controller: uint2Controller,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'uint2',
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: TextFormField(
-                controller: address0Controller,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'address0',
+            Visibility(
+              visible: showAddress0,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                child: TextFormField(
+                  controller: address0Controller,
+                  decoration: InputDecoration(
+                    border: UnderlineInputBorder(),
+                    labelText: labelAddress0,
+                  ),
                 ),
               ),
             ),
@@ -340,17 +488,7 @@ class _MyHomePageState extends State<VotingPage> {
                 child: const Text('Create Proposal'),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: TextFormField(
-                controller: proposalIdController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'Proposal Id',
-                ),
-              ),
-            ),
+
           ],
 
         ),

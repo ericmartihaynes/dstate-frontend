@@ -79,7 +79,7 @@ class _MyHomePageState extends State<ProposalsPage> {
       widget.proposals.insert(0, votingButton);
     }
   }
-  //TODO: Make voting when clicked proposal
+
   void createProposal(String buildingId, String tokenAddress, String title, String description, int proposalType, int uint0, int uint1, int uint2, String address0) async {
     Response rsp = await post(
       Uri.parse('http://' + widget.localIp + ':3001/token/createProposal'),

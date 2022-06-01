@@ -47,13 +47,14 @@ class _MyHomePageState extends State<TokenPage> {
   final nameController = TextEditingController();
   final symbolController = TextEditingController();
   final amountController = TextEditingController();
-  final rentPriceController = TextEditingController();
-  final depositPriceController = TextEditingController();
-  final remainingMonthsController = TextEditingController();
-  final caretakerShareController = TextEditingController();
-  final caretakerController = TextEditingController();
-  final tenantController = TextEditingController();
+  final rentPriceController = TextEditingController(text: "0");
+  final depositPriceController = TextEditingController(text: "0");
+  final remainingMonthsController = TextEditingController(text: "0");
+  final caretakerShareController = TextEditingController(text: "0");
+  final caretakerController = TextEditingController(text: "0x0000000000000000000000000000000000000000");
+  final tenantController = TextEditingController(text: "0x0000000000000000000000000000000000000000");
   bool isDialogShown = false;
+  bool forRent = false;
 
   //Send data to backend
   Future<Response> sendData(String name, String symbol, double tokenAmount, double rentPrice, double depositPrice, int remainingMonths, int caretakerShare, String caretaker, String tenant) {
@@ -164,7 +165,26 @@ class _MyHomePageState extends State<TokenPage> {
         }
     ).whenComplete(() => isDialogShown = false);
   }
-//TODO: Make adaptive
+
+  changeRentalStatus(){
+    if(!forRent){
+      rentPriceController.text = "0";
+      depositPriceController.text = "0";
+      remainingMonthsController.text = "0";
+      caretakerShareController.text = "0";
+      caretakerController.text = "0x0000000000000000000000000000000000000000";
+      tenantController.text = "0x0000000000000000000000000000000000000000";
+    }
+    else {
+      rentPriceController.text = "";
+      depositPriceController.text = "";
+      remainingMonthsController.text = "";
+      caretakerShareController.text = "";
+      caretakerController.text = "";
+      tenantController.text = "";
+    }
+  }
+//TODO: check if it works without touching switch
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -218,67 +238,99 @@ class _MyHomePageState extends State<TokenPage> {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: TextFormField(
-                controller: rentPriceController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'Rent Price',
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 100, vertical: 16),
+              child: Text(
+                'Rental',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+            Transform.scale(
+                scale: 1.5,
+                child: Switch(
+                    value: forRent,
+                    onChanged: (forRent) => {
+                        setState(() => this.forRent = forRent), changeRentalStatus()})), //
+            Visibility(
+              visible: forRent,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                child: TextFormField(
+                  controller: rentPriceController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    border: UnderlineInputBorder(),
+                    labelText: 'Rent Price',
+                  ),
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: TextFormField(
-                controller: depositPriceController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'Deposit Price',
+            Visibility(
+              visible: forRent,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                child: TextFormField(
+                  controller: depositPriceController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    border: UnderlineInputBorder(),
+                    labelText: 'Deposit Price',
+                  ),
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: TextFormField(
-                controller: remainingMonthsController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'Duration of contract (Months)',
+            Visibility(
+              visible: forRent,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                child: TextFormField(
+                  controller: remainingMonthsController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    border: UnderlineInputBorder(),
+                    labelText: 'Duration of contract (Months)',
+                  ),
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: TextFormField(
-                controller: caretakerShareController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'Caretaker Share of Rent (0-100)',
+            Visibility(
+              visible: forRent,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                child: TextFormField(
+                  controller: caretakerShareController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    border: UnderlineInputBorder(),
+                    labelText: 'Caretaker Share of Rent (0-100)',
+                  ),
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: TextFormField(
-                controller: caretakerController,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'Caretaker Public Address',
+            Visibility(
+              visible: forRent,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                child: TextFormField(
+                  controller: caretakerController,
+                  decoration: const InputDecoration(
+                    border: UnderlineInputBorder(),
+                    labelText: 'Caretaker Public Address',
+                  ),
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: TextFormField(
-                controller: tenantController,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'Tenant Public Address',
+            Visibility(
+              visible: forRent,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                child: TextFormField(
+                  controller: tenantController,
+                  decoration: const InputDecoration(
+                    border: UnderlineInputBorder(),
+                    labelText: 'Tenant Public Address',
+                  ),
                 ),
               ),
             ),
