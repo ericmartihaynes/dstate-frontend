@@ -184,7 +184,6 @@ class _MyHomePageState extends State<TokenPage> {
       tenantController.text = "";
     }
   }
-//TODO: check if it works without touching switch
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done

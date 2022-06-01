@@ -44,11 +44,11 @@ class individualProposalPage extends StatefulWidget {
   final String rentAddress;
   final String title2;
   final String description;
-  final int proposalType;
+  final String proposalType;
   final int id;
-  final int uint0;
-  final int uint1;
-  final int uint2;
+  final String uint0;
+  final String uint1;
+  final String uint2;
   final String address0;
   final String votesNumber;
   final bool accepted;
@@ -247,7 +247,7 @@ class _MyHomePageState extends State<individualProposalPage> {
         }
     ).whenComplete(() => isDialogShown = false);
   }
-//TODO: Make adaptive
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -305,7 +305,7 @@ class _MyHomePageState extends State<individualProposalPage> {
                         Padding(
                           padding: const EdgeInsets.all(4.0),
                           child: Text(
-                            'Proposal type: ' + widget.proposalType.toString(),
+                            widget.proposalType,
                             style: TextStyle(
                               fontSize: 20,
                               color: Colors.white,
@@ -325,7 +325,7 @@ class _MyHomePageState extends State<individualProposalPage> {
                         Padding(
                           padding: const EdgeInsets.all(4.0),
                           child: Text(
-                            'uint0: ' + widget.uint0.toString(),
+                            widget.uint0,
                             style: TextStyle(
                               fontSize: 20,
                               color: Colors.white,
@@ -335,7 +335,7 @@ class _MyHomePageState extends State<individualProposalPage> {
                         Padding(
                           padding: const EdgeInsets.all(4.0),
                           child: Text(
-                            'uint1: ' + widget.uint1.toString(),
+                            widget.uint1,
                             style: TextStyle(
                               fontSize: 20,
                               color: Colors.white,
@@ -345,7 +345,7 @@ class _MyHomePageState extends State<individualProposalPage> {
                         Padding(
                           padding: const EdgeInsets.all(4.0),
                           child: Text(
-                            'uint2: ' + widget.uint2.toString(),
+                            widget.uint2,
                             style: TextStyle(
                               fontSize: 20,
                               color: Colors.white,
@@ -355,7 +355,7 @@ class _MyHomePageState extends State<individualProposalPage> {
                         Padding(
                           padding: const EdgeInsets.all(4.0),
                           child: Text(
-                            'address0: ' + widget.address0,
+                            widget.address0,
                             style: TextStyle(
                               fontSize: 20,
                               color: Colors.white,
@@ -375,7 +375,7 @@ class _MyHomePageState extends State<individualProposalPage> {
                         Padding(
                           padding: const EdgeInsets.all(4.0),
                           child: Text(
-                            'accepted: ' + widget.accepted.toString(),
+                            'Accepted: ' + widget.accepted.toString(),
                             style: TextStyle(
                               fontSize: 20,
                               color: Colors.white,

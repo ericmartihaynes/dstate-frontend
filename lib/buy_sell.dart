@@ -380,6 +380,71 @@ class _MyHomePageState extends State<BuySellPage> {
     Map<String, dynamic> decodedRsp =json.decode(rsp.body);
     var prop = decodedRsp["proposals"];
 
+    String sendProposalType = "";
+    String sendUint0 = "";
+    String sendUint1 = "";
+    String sendUint2 = "";
+    String sendAddress0 = "";
+
+
+    switch (proposalType) {
+      case 0:
+        {
+          sendProposalType = "Generic Proposal";
+
+        }
+        break;
+      case 1:
+        {
+          sendProposalType = "Change Rent Price";
+          sendUint0 = "New Rent Price: " + uint0.toString();
+        }
+        break;
+      case 2:
+        {
+          sendProposalType = "Change Deposit Price";
+          sendUint0 = "New Deposit Price: " + uint0.toString();
+        }
+        break;
+      case 3:
+        {
+          sendProposalType = "Change Caretaker Share";
+          sendUint0 = "New Caretaker Share: " + uint0.toString();
+
+        }
+        break;
+      case 4:
+        {
+          sendProposalType = "Replace Caretaker";
+          sendAddress0 = "New Caretaker: " + address0;
+
+        }
+        break;
+      case 5:
+        {
+          sendProposalType = "Remove Tenant";
+
+        }
+        break;
+      case 6:
+        {
+          sendProposalType = "Accept New Tenant";
+          sendUint0 = "Contract: " + uint0.toString() + " Months";
+          sendUint1 = "Rent Price: " + uint0.toString();
+          sendUint2 = "Deposit Price: " + uint0.toString();
+          sendAddress0 = "New Tenant: " + address0;
+
+        }
+        break;
+      case 7:
+        {
+          sendProposalType = "Renew Contract";
+          sendUint0 = "Additional Months: " + uint0.toString();
+
+        }
+        break;
+    }
+
     votesNumber = prop[0]["votesN"];
     accepted = prop[0]["votingResult"];
     Navigator.push(context, MaterialPageRoute(builder: (context) {
@@ -394,12 +459,12 @@ class _MyHomePageState extends State<BuySellPage> {
         rentAddress: widget.rentAddress,
         title2: title,
         description: description,
-        proposalType: proposalType,
+        proposalType: sendProposalType,
         id: id,
-        uint0: uint0,
-        uint1: uint1,
-        uint2: uint2,
-        address0: address0,
+        uint0: sendUint0,
+        uint1: sendUint1,
+        uint2: sendUint2,
+        address0: sendAddress0,
         votesNumber: votesNumber,
         accepted: accepted
       );

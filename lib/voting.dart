@@ -45,7 +45,7 @@ class VotingPage extends StatefulWidget {
 
 class _MyHomePageState extends State<VotingPage> {
   bool isDialogShown = false;
-  List<String> proposalTypes = ["Generic Proposal", "Change Price Rent Price", "Change Deposit Price",
+  List<String> proposalTypes = ["Generic Proposal", "Change Rent Price", "Change Deposit Price",
     "Change Caretaker Share", "Replace Caretaker", "Remove Tenant", "Accept New Tenant", "Renew Current Contract"];
   String selectedProposalType = "Generic Proposal";
   bool showUint0 = false;
@@ -261,7 +261,7 @@ class _MyHomePageState extends State<VotingPage> {
           address0Controller.text = "0x0000000000000000000000000000000000000000";
         }
         break;
-      case "Change Price Rent Price":
+      case "Change Rent Price":
         {
           type = 1;
           showUint0 = true;
@@ -367,7 +367,7 @@ class _MyHomePageState extends State<VotingPage> {
 
   }
 
-//TODO: Make adaptive
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
