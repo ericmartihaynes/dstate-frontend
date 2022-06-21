@@ -124,7 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   //Via: 10.154.200.10
   //Kamtjatka: 10.20.11.1
-  String localIp = "10.20.11.1"; //TODO Change ip
+  String localIp = "10.154.200.82"; //TODO Change ip
 
 
   Future<Response> fetchUsers(String publicAddress) {

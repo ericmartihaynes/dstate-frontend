@@ -97,6 +97,7 @@ class _MyHomePageState extends State<BuySellPage> {
       tx = await widget.provider.sendTransaction(from: widget.accountAddress,
           to: widget.tokenAddress,
           data: encodedData,
+          nonce: nonce,
           gas: 1500000);
       if(isDialogShown){Navigator.pop(context);}
       print("Approved!");
@@ -138,7 +139,8 @@ class _MyHomePageState extends State<BuySellPage> {
     );
     Map<String, dynamic> decodedRsp2 =json.decode(rsp2.body);
     String data2 = decodedRsp2["abi"];
-    int nonce = int.parse(decodedRsp["nonce"].toString());
+    int nonce = int.parse(decodedRsp2["nonce"].toString());
+    print(nonce);
     data2 = data2.substring(2);
     const Utf8Encoder encoder = Utf8Encoder();
     List<int> value = hex.decode(data2);
